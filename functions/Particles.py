@@ -79,6 +79,6 @@ class Particles:
         self.room_size=room_size
         self.pos_type=pos_type
         self.vel_type=vel_type
-        self.vel_distrib(self.nparticles,self.T,self.vel_type)
-        self.pos_distrib(self.nparticles,self.room_size,self.pos_type)
+        self.vel_distrib()
+        self.pos_distrib()
         return

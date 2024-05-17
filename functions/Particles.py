@@ -61,21 +61,16 @@ class Particles:
             return ValueError('Distribution type not supported')
         return
     
-    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particle_type='air'):
+    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9):
         """
         This function will set the properties of particles.
         pos_type: type of position distribution (uniform, normal)
         vel_type: type of velocity distribution (Boltzmann)
         room_size: size of the room [xmin,xmax,ymin,ymax]
-        T: temperature of the particles
-        particle_type: type of particle (air)
+        T: temperature of the particles(K) ex.room temperature=300
+        molecular_weight: molecular weight of the particles(amu) ex.air=28.9
         """
-        self.particle_type=particle_type
-        if particle_type=='air':
-            #average mass of a particle is about 7 times the mass of an alpha particle(He+2)
-            self.mass=const.physical_constants['alpha particle mass'][0]*7 
-        else:   
-            return ValueError('Particle type not supported')
+        self.mass=const.physical_constants['atomic mass constant'][0]*molecular_weight
         self.T=T
         self.room_size=room_size
         self.pos_type=pos_type

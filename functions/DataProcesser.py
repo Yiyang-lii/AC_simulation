@@ -2,6 +2,8 @@ import numpy as np
 import scipy.constants as const
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import numba as nb
+from scipy.ndimage import gaussian_filter
 class DataProcesser:
     """
     This class will analyse the data from the simulation.
@@ -44,7 +46,7 @@ class DataProcesser:
         xmin=room_size[0]
         xmax=room_size[1]
         ymin=room_size[2]
-        ymax=room_size[3]
+        ymax=room_size[3]   
         bins_x=int((xmax-xmin)/Nsection)
         bins_y=int((ymax-ymin)/Nsection)
         
@@ -71,9 +73,79 @@ class DataProcesser:
         ax2.legend()
 
         plt.show()
-        
-        
+    @staticmethod
+    def plot_gas_density(x:list, y:list, room_size:list, resolution=100,sigma=5):
+        """
+        This function will plot the gas density of the particles.
+        x: The x position of the particles.
+        y: The y position of the particles.
+        room_size: The size of the room [xmin,xmax,ymin,ymax].
+        resolution: How many bins to divide the room into.Example: resolution=100 means the room is divided into 100*100 bins.
+        sigma: The standard deviation of the Gaussian filter. Higer value will smooth the data more.
+        """
+        H, _, _ = np.histogram2d(x, y, bins=resolution)
+        smoothed_H = gaussian_filter(H, sigma=sigma)
+        plt.imshow(smoothed_H.T, extent=room_size, cmap='gray', origin='lower')
+        cb = plt.colorbar()
+        cb.set_label('Counts in Bin')
+        plt.xlabel('X Axis')
+        plt.ylabel('Y Axis')
+        plt.title('Smoothed 2D Histogram with Specified Resolution')
+        plt.show()
 
+    def plot_gas_temperature(particles, resolution=200,vmin=0,vmax=1000,sigma=5):
+        """
+        This function will plot the gas temperature of the particles distribution in the room.
+        particles: The particles object.
+        resolution: How many bins to divide the room into.Example: resolution=100 means the room is divided into 100*100 bins.
+        vmin: The minimum value of the colorbar. In this case, it is the minimum value of the temperature.
+        vmax: The maximum value of the colorbar. In this case, it is the maximum value of the temperature.
+        """
+        x = particles.pos[:, 0]
+        y = particles.pos[:, 1]
+        tempturature = np.linalg.norm(particles.vel, axis=1)**2*particles.mass/(3*const.Boltzmann)
+        # Define resolution and room size
+        xmin, xmax, ymin, ymax = particles.room_size
+        # Calculate bin edges
+        xbins = np.linspace(xmin, xmax, resolution)
+        ybins = np.linspace(ymin, ymax, resolution)
+        # Loop through each bin and calculate the mean value of z_values within that bin
+        mean_values=DataProcesser.determine_bins_z_value(xbins,ybins,x,y,tempturature)
+        # Smooth the data using a Gaussian filter
+        smoothed_mean_values = gaussian_filter(mean_values, sigma=sigma)
+        #ckeck the mean value of the temperature
+        temp=np.mean(tempturature)
+        print('T_average=',temp,'K')
+        # Plot the 2D histogram with mean values
+        plt.imshow(smoothed_mean_values.T, extent=(xmin, xmax, ymin, ymax), cmap='jet',vmin=vmin,vmax=vmax, origin='lower')
+        plt.colorbar(label='Mean Z Values')
+        plt.xlabel('X Axis')
+        plt.ylabel('Y Axis')
+        plt.title('2D Histogram with Mean Z Values')
+        plt.show() 
+        return temp
+
+  
+    @staticmethod
+    @nb.njit(parallel=True)
+    def determine_bins_z_value(xbins,ybins,x,y,z):
+        '''
+        This function will determine the meanvalue of z in each bin and return the mean value as a 2D array .
+        '''
+        # Calculate bin centers
+        xcenters = (xbins[:-1] + xbins[1:]) / 2
+        ycenters = (ybins[:-1] + ybins[1:]) / 2
+        # Initialize an array to store the mean values
+        mean_values = np.zeros((len(xcenters), len(ycenters)))
+
+        for i in range(len(xcenters)):
+            for j in range(len(ycenters)):
+                x_in_bin = (x >= xbins[i]) & (x < xbins[i+1])
+                y_in_bin = (y >= ybins[j]) & (y < ybins[j+1])
+                points_in_bin = x_in_bin & y_in_bin
+                if np.sum(points_in_bin) > 0:
+                    mean_values[i, j] = np.mean(z[points_in_bin])
+        return mean_values
  
     @staticmethod
     def data_output():
@@ -106,3 +178,16 @@ class DataProcesser:
         """
         #TODO
         pass
+    if __name__ == '__main__':
+        import numpy as np
+        from Particles import Particles
+        from DataProcesser import DataProcesser
+
+
+        particles_number=100000
+        particles=Particles(particles_number)
+        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=500,particle_type='air')
+        #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
+        #DataProcesser.plot_position_distribution(particles.pos,room_size=particles.room_size, Nsection=1)
+        DataProcesser.plot_gas_density(particles.pos[:,0], particles.pos[:,1], particles.room_size, resolution=100,sigma=3)
+        DataProcesser.plot_gas_temperature(particles, resolution=200,vmin=0,vmax=1000,sigma=5)

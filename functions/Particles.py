@@ -60,6 +60,7 @@ class Particles:
         else:
             return ValueError('Distribution type not supported')
         return
+    
     def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particle_type='air'):
         """
         This function will set the properties of particles.
@@ -82,3 +83,21 @@ class Particles:
         self.vel_distrib()
         self.pos_distrib()
         return
+    
+    def count_average_T(self):
+        """
+        This function will calculate the average temperature of the particles.
+        """
+        return np.mean(np.linalg.norm(self.vel, axis=1)**2*self.mass/(3*const.Boltzmann))
+    
+    if __name__ == "__main__":
+        import numpy as np
+        from Particles import Particles
+        from DataProcesser import DataProcesser
+
+
+        particles_number=100000
+        particles=Particles(particles_number)
+        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particle_type='air')
+        print(particles.count_average_T())
+        pass

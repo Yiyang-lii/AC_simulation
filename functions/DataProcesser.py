@@ -4,6 +4,8 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 import numba as nb
 from scipy.ndimage import gaussian_filter
+import pickle
+import os
 class DataProcesser:
     """
     This class will analyse the data from the simulation.
@@ -115,7 +117,7 @@ class DataProcesser:
         smoothed_mean_values = gaussian_filter(mean_values, sigma=sigma)
         #ckeck the mean value of the temperature
         temp=np.mean(tempturature)
-        print('T_average=',temp,'K')
+        print('T_average=',round(temp,3),'K')
         # Plot the 2D histogram with mean values
         plt.imshow(smoothed_mean_values.T, extent=(xmin, xmax, ymin, ymax), cmap='jet',vmin=vmin,vmax=vmax, origin='lower')
         plt.colorbar(label='Mean Z Values')
@@ -137,31 +139,50 @@ class DataProcesser:
         ycenters = (ybins[:-1] + ybins[1:]) / 2
         # Initialize an array to store the mean values
         mean_values = np.zeros((len(xcenters), len(ycenters)))
-
+        i=range(len(xcenters))
+        j=range(len(ycenters))
         for i in range(len(xcenters)):
-            for j in range(len(ycenters)):
-                x_in_bin = (x >= xbins[i]) & (x < xbins[i+1])
-                y_in_bin = (y >= ybins[j]) & (y < ybins[j+1])
-                points_in_bin = x_in_bin & y_in_bin
-                if np.sum(points_in_bin) > 0:
-                    mean_values[i, j] = np.mean(z[points_in_bin])
+           for j in range(len(ycenters)):
+               x_in_bin = (x >= xbins[i]) & (x < xbins[i+1])
+               y_in_bin = (y >= ybins[j]) & (y < ybins[j+1])
+               points_in_bin = x_in_bin & y_in_bin
+               if np.sum(points_in_bin) > 0:
+                   mean_values[i, j] = np.mean(z[points_in_bin])
         return mean_values
  
     @staticmethod
-    def data_output():
+    def data_output(particles, filepath,filename):
         """
         This function will output the data to the file.
         """
-        #TODO
-        pass
+        if  not os.path.exists(filepath):
+            try:
+                os.mkdir(filepath)
+                print(f'Seems like the folder of {filepath} does not exist. Creating it now.')
+            except :
+                print(f'Over one folder does not exist along {filepath}. Please check your path.\n \
+                      To prevent the data from deleted, the file will be saved in the  folder "data" under current directory.')
+                if  not os.path.exists('./data'):
+                    os.mkdir('./data')
+                    print(f'Creating the folder "data" under current directory.')
+                else:
+                    filepath='./data'       
+        path=filepath+'/'+filename+'.bin'
+        with open(path, 'wb') as file:
+            pickle.dump(particles, file)
+        return
 
     @staticmethod
-    def data_input():
+    def data_input(object,filepath,filename):
         """
         This function will save the data to the file.
         """
-        #TODO
-        pass
+        path=filepath+'/'+filename+'.bin'
+        if  not os.path.exists(path):
+            return FileNotFoundError(f'The file {path} does not exist. Please check your path.')
+        with open( path, 'rb') as file:
+            object = pickle.load(file)        
+        return object
 
     @staticmethod
     def data_plot():
@@ -182,12 +203,16 @@ class DataProcesser:
         import numpy as np
         from Particles import Particles
         from DataProcesser import DataProcesser
-
-
+        import time
+        import gc
+        gc.collect()
         particles_number=100000
         particles=Particles(particles_number)
-        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=500,particle_type='air')
+        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
         #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
         #DataProcesser.plot_position_distribution(particles.pos,room_size=particles.room_size, Nsection=1)
-        DataProcesser.plot_gas_density(particles.pos[:,0], particles.pos[:,1], particles.room_size, resolution=100,sigma=3)
+        #DataProcesser.plot_gas_density(particles.pos[:,0], particles.pos[:,1], particles.room_size, resolution=100,sigma=3)
         DataProcesser.plot_gas_temperature(particles, resolution=200,vmin=0,vmax=1000,sigma=5)
+        DataProcesser.data_output(particles,'data','particles')
+        particles=DataProcesser.data_input(particles,'data','particles')
+ 

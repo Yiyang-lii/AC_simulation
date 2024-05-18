@@ -4,12 +4,25 @@ import scipy.stats as stats
 class Particles:
     """
     Class particles is the base on the particles we have on class. It contains the basic properties of particles.
+    It contains the following properties:
+    nparticles: number of particles 
+    time: time of the simulation
+    pos: position of the particles
+    vel: velocity of the particles
+    mass: mass of the particles
+    T:  average temperature of all particles
+    room_size: size of the room.(only support rectangle room)
+    pos_type: type of position distribution
+    vel_type: type of velocity distribution
+    molecular_weight: molecular weight of the particles
+    particles_radius: radius of the particles
     """
     def __init__(self,n):
         """
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
+        self.time=0
         self.pos=np.zeros((n,2))
         self.vel=np.zeros((n,2))
         return
@@ -61,7 +74,7 @@ class Particles:
             return ValueError('Distribution type not supported')
         return
     
-    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9):
+    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9,particles_radius='None'):
         """
         This function will set the properties of particles.
         pos_type: type of position distribution (uniform, normal)
@@ -69,12 +82,15 @@ class Particles:
         room_size: size of the room [xmin,xmax,ymin,ymax]
         T: temperature of the particles(K) ex.room temperature=300
         molecular_weight: molecular weight of the particles(amu) ex.air=28.9
+        particles_radius: radius of the particles(0.1nm=1e-10m) ex.air=1.55
         """
         self.mass=const.physical_constants['atomic mass constant'][0]*molecular_weight
+        self.particles_radius=particles_radius
         self.T=T
         self.room_size=room_size
         self.pos_type=pos_type
         self.vel_type=vel_type
+        self.molecular_weight=molecular_weight
         self.vel_distrib()
         self.pos_distrib()
         return
@@ -93,6 +109,6 @@ class Particles:
 
         particles_number=100000
         particles=Particles(particles_number)
-        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particle_type='air')
+        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
         print(particles.count_average_T())
         pass

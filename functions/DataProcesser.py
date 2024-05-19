@@ -80,7 +80,7 @@ class DataProcesser:
     @staticmethod
     def plot_gas_number_density(particles, resolution=100,sigma=5,fig_save=False):
         """
-        This function will plot the gas density of the particles.
+        This function will plot the gas density of the particles. It will return the image object of the plot.
         particles: The particles object.
         resolution: How many bins to divide the room into.Example: resolution=100 means the room is divided into 100*100 bins.
         sigma: The standard deviation of the Gaussian filter. Higer value will smooth the data more.
@@ -110,7 +110,7 @@ class DataProcesser:
     @staticmethod
     def plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=5,fig_save=False):
         """
-        This function will plot the gas temperature of the particles distribution in the room.
+        This function will plot the gas temperature of the particles distribution in the room. It will return the image object of the plot.
         particles: The particles object.
         resolution: How many bins to divide the room into.Example: resolution=100 means the room is divided into 100*100 bins.
         vmin: The minimum value of the colorbar. In this case, it is the minimum value of the temperature.
@@ -152,7 +152,19 @@ class DataProcesser:
             plt.show() 
         return im
 
-
+    @staticmethod
+    def plot_particles(particles):
+        """
+        This function will plot the particles.
+        particles: The particles object.
+        """
+        plt.figure()
+        plt.scatter(particles.pos[:, 0], particles.pos[:, 1], s=1)
+        plt.xlabel('X (m)')
+        plt.ylabel('Y (m)')
+        plt.title('Particles Distribution')
+        plt.show()
+        pass
   
     @staticmethod
     @nb.njit(parallel=True)
@@ -223,6 +235,10 @@ class DataProcesser:
     def output_movie(fns, filename='movie.mp4',fps=30,plot_func='plot_gas_temperature'):
         """
         This function will create a movie of the data.
+        fns: list, the list of output files
+        filename: string, the name of the output movie
+        fps: int, the frame per second of the movie
+        plot_func: string, the name of the plot function
         """
         fig = plt.figure()
         def init():
@@ -230,8 +246,8 @@ class DataProcesser:
             return []
         def update(frame):
             fn=fns[frame]
-            print(fn)
-            print(frame)
+            print('filepath=',fn)
+            print('frame=',frame)
             particles = DataProcesser.data_input(fn)    
             if plot_func=='plot_gas_number_density':
                 return DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=5,fig_save=True),
@@ -246,9 +262,9 @@ class DataProcesser:
         import glob
         """
         Load the data from the output file
-
-        :param header: string, the header of the output file
+        header: string, the header of the output file
         """
+
         fns=f'data/{header}_t{pattern}.bin'
         fns = glob.glob(fns)
         fns.sort()

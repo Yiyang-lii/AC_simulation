@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.constants as const
 import scipy.stats as stats
+import numba as nb
 class Particles:
     """
     Class particles is the base on the particles we have on class. It contains the basic properties of particles.
@@ -101,14 +102,33 @@ class Particles:
         """
         return np.mean(np.linalg.norm(self.vel, axis=1)**2*self.mass/(3*const.Boltzmann))
     
+    @nb.njit(parallel=True)
+    def rotate_particles(self,zion_radius:float,source_point:tuple):
+        """
+        This function will rotate the particles by an angle theta.
+        """
+        xs,ys=source_point
+        for i in self.pos:
+            point_vector=np.array([xs,ys])-self.pos[i]
+            distance=np.linalg.norm(point_vector)
+            if distance>zion_radius:
+                continue   
+            else:
+                theta=np.arccos(self.vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(self.vel[i])))/distance
+                c, s = np.cos(theta), np.sin(theta)
+                R = np.array([[c, -s], [s, c]])
+                self.vel[i]=np.dot(self.vel[i],R)
+        return
+
     if __name__ == "__main__":
         import numpy as np
         from Particles import Particles
         from DataProcesser import DataProcesser
 
-
-        particles_number=100000
+        nthreads = 8
+        set_num_threads(nthreads)
+        particles_number=10
         particles=Particles(particles_number)
         particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
-        print(particles.count_average_T())
-        pass
+        rotate_particles(zion_radius=25,suckzion_source_point=(0,0))
+

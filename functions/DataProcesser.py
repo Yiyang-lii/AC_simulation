@@ -177,10 +177,8 @@ class DataProcesser:
         ycenters = (ybins[:-1] + ybins[1:]) / 2
         # Initialize an array to store the mean values
         mean_values = np.zeros((len(xcenters), len(ycenters)))
-        i=range(len(xcenters))
-        j=range(len(ycenters))
-        for i in range(len(xcenters)):
-           for j in range(len(ycenters)):
+        for i in nb.prange(len(xcenters)):
+           for j in nb.prange(len(ycenters)):
                x_in_bin = (x >= xbins[i]) & (x < xbins[i+1])
                y_in_bin = (y >= ybins[j]) & (y < ybins[j+1])
                points_in_bin = x_in_bin & y_in_bin

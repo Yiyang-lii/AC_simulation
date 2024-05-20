@@ -113,7 +113,7 @@ class Particles:
         source_point: point of the source
         """
       
-        for i in range(len(pos[0])):
+        for i in nb.prange(len(pos[0])):
             point_vector=np.array(source_point)-pos[i]
             distance=np.linalg.norm(point_vector)
             if distance>zone_radius:

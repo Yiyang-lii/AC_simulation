@@ -62,8 +62,7 @@ class Environment:
         r       = pos - dot
         dic_rot = np.cross(pos,r)
         # start the loop to check every particle in the particles
-        #for i in range(n):
-        #    vel = 
+        vel = Particles.rotate_particles()
             
 
 

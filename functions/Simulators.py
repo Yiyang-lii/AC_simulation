@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numba as nb
-from Environment import Environment
+# from Environment import Environment
 from Particles import Particles
-from DataProcesser import DataProcesser
+# from DataProcesser import DataProcesser
 
 class Simulators:
     """
@@ -13,11 +13,10 @@ class Simulators:
     def __init__(self, particle: Particles):
         #TODO
         self.particle = Particles
-        self.time = 0;
-        # future work: try to read the last output file and resume if something unexpected interrupted the simulation
-        
+        # self.data = DataProcesser()
+        # self.Environment = Environment()
 
-    def evolve(self, dt:float, tmax:float):
+    def evolve(self, dt:float, tmax:float, collision=False, resume=False):
         """
         Start to evolve the system
 
@@ -26,6 +25,17 @@ class Simulators:
         
         """
         #TODO
+        self.time = 0
+        self.tmax = 10
+        self.time_arr = np.linspace(self.time, tmax, int(tmax/dt)+1)   
+        # future work: try to read the last output file and resume if something unexpected interrupted the simulation
+        # such as: if (previous output exist == true && resume == true), then start from last output
+        
+        for i in range(len(self.time_arr)):
+            self.next_step(dt)
+            if collision:
+                self.next_step_collision(dt)
+           
 
     def next_step(self, dt:float):
         """
@@ -33,6 +43,9 @@ class Simulators:
         """
         #TODO
         self.time += dt
+        self.particle.pos += self.particle.vel * dt
+
+
 
     def next_step_collision(self, dt:float):
         """
@@ -45,10 +58,17 @@ if __name__ == "__main__":
     
     nthreads = 2
     nb.set_num_threads(nthreads)
+
+    dt = 0.01
+    tmax = 10
     
     particles_number = 10
     particles = Particles(particles_number)
     particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
     
     simulation = Simulators(particles)
-    simulation.evolve(dt=0.01, tmax=10)
+    simulation.evolve(dt=dt, tmax=tmax, collision=False, resume=False)
+    print(particles.pos)
+    print(particles.vel)
+
+

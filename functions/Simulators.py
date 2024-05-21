@@ -12,7 +12,7 @@ class Simulators:
     """
     def __init__(self, particle: Particles):
         #TODO
-        self.particle = Particles
+        self.particle = particle
         # self.data = DataProcesser()
         # self.Environment = Environment()
 
@@ -46,7 +46,6 @@ class Simulators:
         self.particle.pos += self.particle.vel * dt
 
 
-
     def next_step_collision(self, dt:float):
         """
         This function will calculate the next step of the simulation with collision.
@@ -66,9 +65,9 @@ if __name__ == "__main__":
     particles = Particles(particles_number)
     particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
     
-    simulation = Simulators(particles)
-    simulation.evolve(dt=dt, tmax=tmax, collision=False, resume=False)
     print(particles.pos)
     print(particles.vel)
+    simulation = Simulators(particles)
+    simulation.evolve(dt=dt, tmax=tmax, collision=False, resume=False)
 
 

@@ -73,6 +73,7 @@ class Environment:
         return
 
     def wall_bounce(self,particle):
+        #TODO: add a window and a wall between ac room and heat space
         """
         This function will simulate how particles interact with the boundary(wall) .
         particle: a Particles object
@@ -99,7 +100,6 @@ class Environment:
                 pos[n,1] = 2 * r_pos[3] - pos[n,1]
         return pos, vel
 
-
     def ac_suck_behavior(self,particle):
         """
         This function will simulate the air conditioner sucking air. Which will turn the velocity of the 
@@ -118,6 +118,8 @@ class Environment:
         particle: a Particles object
         T : temperature of the air ac blows out
         """
+        kB = 1.38064852e-23
+        m  = particle.mass
         num = particle.nparticles
         pos = particle.pos
         vel = particle.vel
@@ -127,12 +129,13 @@ class Environment:
             if self.is_the_particle_in_the_zone(pos, self.ac_suck_hole, n):
                 pos[n,0] = np.random.uniform(blow_hole[0], blow_hole[1])
                 pos[n,1] = np.random.uniform(blow_hole[2], blow_hole[3])
-                vel[n,0] = 
+                vel[n,0] = np.sqrt(8*kB*T/np.pi/m)
                 vel[n,1] = 0
+        return pos, vel
 
-        # blow the sucked in particles out
-
-
+    def heat_zone_add_tmperature(self, particle, T = 310):
+        #TODO
+        pass
         
         
     @staticmethod
@@ -145,19 +148,6 @@ class Environment:
         return (pos[n,0] > zone[0] and pos[n,0] < zone[1] and pos[n,1] > zone[2] and pos[n,1] < zone[3])
 
 
-
-    def air_con_blow(self):
-        """
-        This function will simulate the air conditioner blowing air
-        """
-        #TODO
-        pass
-
-    def heat_storage(self,T):
-        """
-        This function will simulate the hot spot in the room.
-        """
-        #TODO
-        pass
+    
 
 

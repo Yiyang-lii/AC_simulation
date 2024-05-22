@@ -25,13 +25,19 @@ class Simulators:
         
         """
         #TODO
-        self.time = 0
-        self.tmax = 10
-        self.time_arr = np.linspace(self.time, tmax, int(tmax/dt)+1)   
+        self.time = self.particle.time
+        self.tmax = tmax
+        self.time_arr = np.linspace(self.time, tmax, int(tmax/dt)+1) 
         # future work: try to read the last output file and resume if something unexpected interrupted the simulation
         # such as: if (previous output exist == true && resume == true), then start from last output
         
         for i in range(len(self.time_arr)):
+            # if i % 100 == 0:
+            #     print("time: ", self.time_arr[i])
+            #     print("pos: ", self.particle.pos)
+            #     print()
+            #     print("vel: ", self.particle.vel)
+            #     print()
             self.next_step(dt)
             if collision:
                 self.next_step_collision(dt)
@@ -65,8 +71,10 @@ if __name__ == "__main__":
     particles = Particles(particles_number)
     particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
     
-    print(particles.pos)
-    print(particles.vel)
+    print("init pos:\n", particles.pos)
+    print()
+    print("init vel:\n" ,particles.vel)
+    print()
     simulation = Simulators(particles)
     simulation.evolve(dt=dt, tmax=tmax, collision=False, resume=False)
 

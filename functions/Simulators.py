@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import numba as nb
 from envtest import Environment
+# from Environment import Environment
 from Particles import Particles
 from DataProcesser import DataProcesser
 
@@ -38,9 +39,12 @@ class Simulators:
         """
         This function will calculate the next step of the simulation.
         """
-        #TODO
-        self.particle.pos += self.particle.vel * dt
+        # get the next position and velocity of the particles
+        self.particle.pos += self.particle.vel * dt 
+        # check whether particles bounce on the wall
         self.particle.pos, self.particle.vel = self.env.boundary_bounce(self.particle, room_size=self.env.room_size, in_bound=True)
+        # rotate the particles located near the suck zone
+        self.particle.vel = self.particle.rotate_particles(self.particle.pos, self.particle.vel, zone_radius=25, source_point=(0, 0))
 
 
     def next_step_collision(self, dt:float):
@@ -66,7 +70,7 @@ if __name__ == "__main__":
     
     print("init pos:\n", particles.pos)
     print()
-    print("init vel:\n" ,particles.vel)
+    print("init vel:\n", particles.vel)
     print()
 
     particles.vel[:, 0] *= 0.01
@@ -83,8 +87,14 @@ if __name__ == "__main__":
 
     for i in range(len(time_arr)):
         simulation.evolve(dt=dt, collision=False)
-        # if i % 10 == 0:
-        #     print("time: ", time_arr[i])
-        #     print("pos:\n", particles.pos)
-        #     print()
-       
+        if i % 10 == 0:
+            print("time: ", time_arr[i])
+            print("vel:\n", particles.vel)
+            print()
+    
+        if i % 100 == 0:    
+            plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
+            plt.title(f"Particles distribution, t = {time_arr[i]}")
+            plt.show()
+            # plt.savefig(f"/Users/yiyangli/AC_simulation/functions/figures/Particles_distribution_{time_arr[i]}.png")
+    

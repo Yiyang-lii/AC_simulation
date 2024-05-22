@@ -23,7 +23,7 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.time=0
+        self.time = 0
         self.pos=np.zeros((n,2))
         self.vel=np.zeros((n,2))
         return
@@ -85,13 +85,13 @@ class Particles:
         molecular_weight: molecular weight of the particles(amu) ex.air=28.9
         particles_radius: radius of the particles(0.1nm=1e-10m) ex.air=1.55
         """
-        self.mass=const.physical_constants['atomic mass constant'][0]*molecular_weight
-        self.particles_radius=particles_radius
-        self.T=T
-        self.room_size=room_size
-        self.pos_type=pos_type
-        self.vel_type=vel_type
-        self.molecular_weight=molecular_weight
+        self.mass = const.physical_constants['atomic mass constant'][0]*molecular_weight
+        self.particles_radius = particles_radius
+        self.T = T
+        self.room_size = room_size
+        self.pos_type = pos_type
+        self.vel_type = vel_type
+        self.molecular_weight = molecular_weight
         self.vel_distrib()
         self.pos_distrib()
         return

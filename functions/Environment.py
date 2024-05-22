@@ -6,7 +6,7 @@ class Environment:
     """
     Class environment sets how the particles interact with the environment.
     """    
-    def __init__(self, room_size = [0,10,0,10], heat_zone_size = [10,15,0,10]):
+    def __init__(self, room_size = [0,15,0,10], heat_zone_size = [10,15,0,10], open_window = 2):
         """
         Define the properties of the environment.
         room_size: size of the room (only support rectangle room) [xmin,xmax,ymin,ymax]
@@ -27,6 +27,10 @@ class Environment:
         self.ac_blow_hole_dot   = np.array([room_size[0], blow_hole_mid_dot])
         self.ac_blow_hole       = np.array([room_size[0], room_size[0] + buff_length,\
                                 blow_hole_mid_dot - half_hole_length, blow_hole_mid_dot + half_hole_length])
+        # define the range of the window
+        window_dot =(heat_zone_size[2] + heat_zone_size[3]) / 2
+        self.window = np.array([heat_zone_size[0],heat_zone_size[0],\
+                                window_dot - open_window/2, window_dot + open_window/2])
 
     def set_room_size(self, room_size):
         """
@@ -64,6 +68,15 @@ class Environment:
                                             (ac_blow_hole[2] + ac_blow_hole[3])/2])
         return
 
+    def set_window(self, open_window):
+        """
+        Can modify the length of the window on the wall blocking heat zone and ac room.
+        """
+        window_dot =(self.heat_zone[2] + self.heat_zone[3]) / 2
+        self.window = np.array([self.heat_zone[0],self.heat_zone[0],\
+                                window_dot - open_window/2, window_dot + open_window/2])
+        return
+
     def set_heat_zone(self, heat_zone_size):
         """
         Can modify the size of the heat zone.
@@ -72,33 +85,55 @@ class Environment:
         self.heat_zone = np.array(heat_zone_size)
         return
 
-    def wall_bounce(self,particle):
-        #TODO: add a window and a wall between ac room and heat space
+    def wall_between_ac_room_and_heat_space(self):
+        room = self.room_size
+        window = self.window
+        up_wall = np.array([window[0], window[1], window[3], room[3]])
+        down_wall = np.array([window[0], window[1], room[2], window[2]])
+        return up_wall, down_wall
+
+
+    def boundary_bounce(self,particle, room_size = None, in_bound = True):
         """
-        This function will simulate how particles interact with the boundary(wall) .
+        This function will simulate how particles interact with the boundary(wall).
         particle: a Particles object
+        room_size: size of the room [xmin,xmax,ymin,ymax] = self.room_size if not specified
+        in_bound: True if the particle is inside the boundary, False if the particle is outside the boundary
         """
-        num = particle.nparticles
         pos = particle.pos
         vel = particle.vel
-        r_pos = self.room_size
-        # start the loop to check every particle in the particles
-        for n in range(num):
-            # check if the particle is out of the x boundary
-            if pos[n,0] < r_pos[0]:
-                vel[n,0] = -vel[n,0]
-                pos[n,0] = 2 * r_pos[0] - pos[n,0] 
-            elif pos[n,0] > r_pos[1]:
-                vel[n,0] = -vel[n,0]
-                pos[n,0] = 2 * r_pos[1] - pos[n,0]
-            # check if the particle is out of the y boundary
-            if pos[n,1] < r_pos[2]:
-                vel[n,1] = -vel[n,1]
-                pos[n,1] = 2 * r_pos[2] - pos[n,1]
-            elif pos[n,1] > r_pos[3]:
-                vel[n,1] = -vel[n,1]
-                pos[n,1] = 2 * r_pos[3] - pos[n,1]
+        if room_size is not None:
+            self.room_size = room_size
+        r_pos = room_size
+        # check if the particle is out of the boundary for in_bound senario
+        if in_bound:
+            mask1 = pos[:, 0] <= r_pos[0]
+            mask2 = pos[:, 0] >= r_pos[1]
+            mask3 = pos[:, 1] <= r_pos[2]
+            mask4 = pos[:, 1] >= r_pos[3]
+        else:
+        # check if the particle is in the boundary for out_bound senario
+            mask1 = pos[:, 0] >= r_pos[0]
+            mask2 = pos[:, 0] <= r_pos[1]
+            mask3 = pos[:, 1] >= r_pos[2]
+            mask4 = pos[:, 1] <= r_pos[3]
+        # check for negative x boundary
+        pos[mask1, 0] = 2 * r_pos[0] - pos[mask1, 0]
+        vel[mask1, 0] = -vel[mask1, 0]
+        # check for positive x boundary
+        pos[mask2, 0] = 2 * r_pos[1] - pos[mask2, 0]
+        vel[mask2, 0] = -vel[mask2, 0]
+        # check for negative y boundary
+        pos[mask3, 1] = 2 * r_pos[2] - pos[mask3, 1]
+        vel[mask3, 1] = -vel[mask3, 1]
+        # check for positive y boundary
+        pos[mask4, 1] = 2 * r_pos[3] - pos[mask4, 1]
+        vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
+
+    def heat_zone_add_tmperature(self, particle, T = 310):
+        #TODO
+        pass
 
     def ac_suck_behavior(self,particle):
         """
@@ -120,32 +155,27 @@ class Environment:
         """
         kB = 1.38064852e-23
         m  = particle.mass
-        num = particle.nparticles
         pos = particle.pos
         vel = particle.vel
         blow_hole = self.ac_blow_hole
-        # check how much particles should be sucked in
-        for n in range(num):
-            if self.is_the_particle_in_the_zone(pos, self.ac_suck_hole, n):
-                pos[n,0] = np.random.uniform(blow_hole[0], blow_hole[1])
-                pos[n,1] = np.random.uniform(blow_hole[2], blow_hole[3])
-                vel[n,0] = np.sqrt(8*kB*T/np.pi/m)
-                vel[n,1] = 0
-        return pos, vel
-
-    def heat_zone_add_tmperature(self, particle, T = 310):
-        #TODO
-        pass
+        # check which particles are in the suck hole
+        mask = self.is_the_particle_in_the_zone(pos, self.ac_suck_hole)
+        # change the velocity of the particles in the suck hole.
+        pos[mask, 0] = np.random.uniform(blow_hole[0], blow_hole[1], size=np.sum(mask))
+        pos[mask, 1] = np.random.uniform(blow_hole[2], blow_hole[3], size=np.sum(mask))
+        vel[mask, 0] = np.sqrt(8 * kB * T / np.pi / m)
+        vel[mask, 1] = 0
         
+        return pos, vel
         
     @staticmethod
-    def is_the_particle_in_the_zone(pos, zone, n):
+    def is_the_particle_in_the_zone(pos, zone):
         """
         This function will check if the particle is in the zone.
         pos: position of the particle. np.array([x,y])
         zone: zone of the room. [xmin,xmax,ymin,ymax]
         """
-        return (pos[n,0] > zone[0] and pos[n,0] < zone[1] and pos[n,1] > zone[2] and pos[n,1] < zone[3])
+        return (pos[:,0] > zone[0] and pos[:,0] < zone[1] and pos[:,1] > zone[2] and pos[:,1] < zone[3])
 
 
     

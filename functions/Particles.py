@@ -125,15 +125,15 @@ class Particles:
                 vel[i]=np.dot(vel[i],R)
         return vel
 
-    if __name__ == "__main__":
-        import numpy as np
-        from Particles import Particles
-        from DataProcesser import DataProcesser
-        import numba as nb
-        nthreads = 8
-        nb.set_num_threads(nthreads)
-        particles_number=10
-        particles=Particles(particles_number)
-        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
-        Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
+if __name__ == "__main__":
+    import numpy as np
+    from Particles import Particles
+    from DataProcesser import DataProcesser
+    import numba as nb
+    nthreads = 8
+    nb.set_num_threads(nthreads)
+    particles_number=10
+    particles=Particles(particles_number)
+    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
+    Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
 

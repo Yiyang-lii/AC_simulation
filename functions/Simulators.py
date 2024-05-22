@@ -11,10 +11,9 @@ class Simulators:
     """
     Class simulator is base on the simulator we have on class. Which can simulate the evolution of particles.
     """
-    def __init__(self, particle: Particles, data: DataProcesser, env: Environment):
+    def __init__(self, particles: Particles, env: Environment):
         #TODO
-        self.particle = particle
-        self.data = data
+        self.particles = particles
         self.env = env
 
     def evolve(self, dt=0.01, collision=False):
@@ -40,11 +39,11 @@ class Simulators:
         This function will calculate the next step of the simulation.
         """
         # get the next position and velocity of the particles
-        self.particle.pos += self.particle.vel * dt 
+        self.particles.pos += self.particles.vel * dt 
         # check whether particles bounce on the wall
-        self.particle.pos, self.particle.vel = self.env.boundary_bounce(self.particle, room_size=self.env.room_size, in_bound=True)
+        self.particles.pos, self.particles.vel = self.env.boundary_bounce(self.particles, room_size=self.env.room_size, in_bound=True)
         # rotate the particles located near the suck zone
-        self.particle.vel = self.particle.rotate_particles(self.particle.pos, self.particle.vel, zone_radius=25, source_point=(0, 0))
+        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=25, source_point=(0, 0))
 
 
     def next_step_collision(self, dt:float):
@@ -73,28 +72,28 @@ if __name__ == "__main__":
     print("init vel:\n", particles.vel)
     print()
 
-    particles.vel[:, 0] *= 0.01
-    particles.vel[:, 1] *= 0.01
-
-    data = DataProcesser(1, 2) 
+    particles.vel[:, 0] *= 0.1
+    particles.vel[:, 1] *= 0.1 
     
     envir = Environment(room_size=[0,50,0,50],  \
                         heat_zone_size=[25,25,25,25], open_window=2)
     
-    simulation = Simulators(particles, data, envir)
+    simulation = Simulators(particles, envir)
     
     time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
     for i in range(len(time_arr)):
+        particles.step = i
         simulation.evolve(dt=dt, collision=False)
-        if i % 10 == 0:
-            print("time: ", time_arr[i])
-            print("vel:\n", particles.vel)
-            print()
+        # if i % 10 == 0:
+        #     print("time: ", time_arr[i])
+        #     print("vel:\n", particles.vel)
+        #     print()
     
         if i % 100 == 0:    
-            plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
-            plt.title(f"Particles distribution, t = {time_arr[i]}")
-            plt.show()
+            # plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
+            # plt.title(f"Particles distribution, t = {time_arr[i]}")
+            # plt.show()
             # plt.savefig(f"/Users/yiyangli/AC_simulation/functions/figures/Particles_distribution_{time_arr[i]}.png")
     
+            DataProcesser.data_output(particles, "data", "test_rotate")

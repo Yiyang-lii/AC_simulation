@@ -23,9 +23,9 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.time=0
-        self.pos=np.zeros((n,2))
-        self.vel=np.zeros((n,2))
+        self.step = 0 
+        self.pos = np.zeros((n,2))
+        self.vel = np.zeros((n,2))
         return
 
     

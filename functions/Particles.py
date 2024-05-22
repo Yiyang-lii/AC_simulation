@@ -23,7 +23,7 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.time = 0
+        self.step = 0
         self.pos = np.zeros((n,2))
         self.vel = np.zeros((n,2))
         return
@@ -102,7 +102,7 @@ class Particles:
         """
         return np.mean(np.linalg.norm(self.vel, axis=1)**2*self.mass/(3*const.Boltzmann))
     
-    
+    @staticmethod
     @nb.njit(parallel=True)
     def rotate_particles(pos:list,vel:list,zone_radius,source_point):
         """

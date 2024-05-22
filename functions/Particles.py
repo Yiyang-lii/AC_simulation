@@ -102,7 +102,7 @@ class Particles:
         """
         return np.mean(np.linalg.norm(self.vel, axis=1)**2*self.mass/(3*const.Boltzmann))
     
-    
+    @staticmethod
     @nb.njit(parallel=True)
     def rotate_particles(pos:list,vel:list,zone_radius,source_point):
         """
@@ -135,5 +135,8 @@ class Particles:
         particles_number=10
         particles=Particles(particles_number)
         particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
+        print(Particles.count_average_T(particles)) 
+        print(particles.vel)
         Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
+        print(particles.vel)
 

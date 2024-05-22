@@ -108,7 +108,7 @@ class DataProcesser:
         return im
 
     @staticmethod
-    def plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=5,fig_save=False):
+    def plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=1,fig_save=False):
         """
         This function will plot the gas temperature of the particles distribution in the room. It will return the image object of the plot.
         particles: The particles object.
@@ -280,21 +280,21 @@ class DataProcesser:
         gc.collect()
         nthreads = 8
         set_num_threads(nthreads)
-        particles_number=10000
+        particles_number=100000
         particles=Particles(particles_number)
         particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
         start_time = time.time()
         #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
         #DataProcesser.plot_position_distribution(particles.pos,room_size=particles.room_size, Nsection=1)
         #DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=3,fig_save=True)
-        #DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=7,fig_save=True)
-        DataProcesser.data_output(particles,'data','particles')
+        DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=10,fig_save=False)
+        #DataProcesser.data_output(particles,'data','particles')
         #particles=DataProcesser.data_input('data/particles_t0000.bin')
         #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
-        End_time = time.time()
-        print('Time:',End_time-start_time)
+        #End_time = time.time()
+        #print('Time:',End_time-start_time)
 
-        fns=load_files('particles')
-        DataProcesser.output_movie(fns, filename='movie.mp4',fps=1,plot_func='plot_gas_number_density')
+        #fns=load_files('particles')
+        #DataProcesser.output_movie(fns, filename='movie.mp4',fps=1,plot_func='plot_gas_number_density')
         
  

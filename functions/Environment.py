@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-import scipy.stats.maxwell.rvs as maxwell
+import scipy.stats as stats
 import Particles
 
 class Environment:
@@ -180,7 +180,7 @@ class Environment:
         # change the velocity of the particles in the suck hole.
         pos[mask, 0] = np.random.uniform(blow_hole[0], blow_hole[1], size=np.sum(mask))
         pos[mask, 1] = np.random.uniform(blow_hole[2], blow_hole[3], size=np.sum(mask))
-        v_from_T     = maxwell(scale = np.sqrt(kB * T / m), size = 1)
+        v_from_T     = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size = 1)
         theta_for_v  = np.random.uniform(-np.pi, np.pi, size=np.sum(mask))
         vel[mask, 0] = v_from_T * np.cos(theta_for_v)
         vel[mask, 1] = v_from_T * np.sin(theta_for_v)

@@ -134,7 +134,7 @@ if __name__ == "__main__":
     nb.set_num_threads(nthreads)
     particles_number=10
     particles=Particles(particles_number)
-    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
+    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,5000,0,5000],T=300,molecular_weight=28.9) 
     Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
 
 

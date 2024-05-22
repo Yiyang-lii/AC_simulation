@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from Particles import Particles
+from functions.Particles import Particles
 
 class Environment:
     """

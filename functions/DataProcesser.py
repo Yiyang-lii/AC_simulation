@@ -98,12 +98,14 @@ class DataProcesser:
         plt.xlabel('X (m)')
         plt.ylabel('Y (m)')
         plt.title('2D Gas Number Density Distribution at t='+str(particles.step))
-        if fig_save:
+        if fig_save=='video':
+            return 
+        elif fig_save==True:
             if not os.path.exists('Gas_number_density_Distribution'):
                 os.mkdir('Gas_number_density_Distribution')
             plt.savefig(f'Gas_number_density_Distribution/gas_number_density_resolution{resolution}_t{particles.step}.png')
             plt.close()
-        else:
+        elif fig_save==False:
             plt.show()
         return im
 
@@ -143,13 +145,15 @@ class DataProcesser:
         plt.xlabel('X (m)')
         plt.ylabel('Y (m)')
         plt.title('2D Temperature Distribution at t='+str(particles.step))
-        if fig_save:
+        if fig_save=='video':
+            return 
+        elif fig_save==True:
             if not os.path.exists('Tempturature_Distribution'):
                 os.mkdir('Tempturature_distribution')
             plt.savefig(f'Tempturature_distribution/temperature_Distribution_resolution{resolution}_t{particles.step}.png')
             plt.close()
-        else:   
-            plt.show() 
+        elif fig_save==False:
+            plt.show()
         return im
 
     @staticmethod
@@ -222,14 +226,6 @@ class DataProcesser:
             return pickle.load(file)
 
     @staticmethod
-    def data_plot():
-        """
-        This function will plot the data.
-        """
-        #TODO
-        pass
-
-    @staticmethod
     def output_movie(fns, resolution=100, sigma=5, filename='movie.mp4', fps=30, plot_func='plot_gas_temperature'):
         """
         This function will create a movie of the data.
@@ -238,27 +234,29 @@ class DataProcesser:
         fps: int, the frame per second of the movie
         plot_func: string, the name of the plot function
         """
-        # fig = plt.figure()
-        fig, ax = plt.subplots()
-        line, = ax.DataProcesser.plot_gas_number_density([], resolution=100, sigma=1, fig_save=True)
+        fig = plt.figure()
         def init():
             # Do any necessary setup here
+
             return []
         def update(frame):
+            plt.clf()
             fn = fns[frame]
             print('filepath=',fn)
             print('frame=',frame)
+    
             particles = DataProcesser.data_input(fn)    
-            line.set_data(particles)
-            # if plot_func == 'plot_gas_number_density':
-                # DataProcesser.plot_gas_number_density(particles, resolution=resolution,sigma=sigma,fig_save=True)
+            print('particles.step=',particles.step)
+            if plot_func == 'plot_gas_temperature':
+                DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,fig_save='video')
+            elif plot_func == 'plot_gas_number_density':
+                DataProcesser.plot_gas_number_density(particles, resolution=resolution,sigma=sigma,fig_save='video')
+            return
 
-            # elif plot_func == 'plot_gas_temperature':
-                # DataProcesser.plot_gas_temperature(particles, resolution=resolution,vmin=280,vmax=320,sigma=sigma,fig_save=True)
-            return line, 
         ani = animation.FuncAnimation(fig, update, frames=len(fns), init_func=init)
         ani.save(filename, writer='ffmpeg', fps=fps)
         return
+
     
     @staticmethod
     def load_files(header,pattern='[0-9][0-9][0-9][0-9]'):
@@ -283,23 +281,23 @@ if __name__ == '__main__':
     import gc
     from numba import set_num_threads
     gc.collect()
-    nthreads = 2
+    nthreads = 8
     set_num_threads(nthreads)
-    particles_number=10000
-    particles=Particles(particles_number)
-    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
+    #particles_number=10000
+    #particles=Particles(particles_number)
+    #particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9)
     start_time = time.time()
     #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
     #DataProcesser.plot_position_distribution(particles.pos,room_size=particles.room_size, Nsection=1)
-    #DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=3,fig_save=True)
+    #DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=3,fig_save=False)
     #DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=7,fig_save=True)
     # DataProcesser.data_output(particles,'data','particles')
-    particles=DataProcesser.data_input('../data/test_rotate_t0000.bin')
+    #particles=DataProcesser.data_input('../data/test_rotate_t0000.bin')
     #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
     End_time = time.time()
     print('Time:',End_time-start_time)
-
     fns=DataProcesser.load_files('test_rotate')
-    DataProcesser.output_movie(fns, resolution=100, sigma=1, filename="test_rotate.mp4", fps=1, plot_func="plot_gas_number_density")
+    DataProcesser.output_movie(fns, resolution=100, sigma=5, filename="test_rotate.mp4", fps=5, plot_func="plot_gas_number_density")
+    
     
  

@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
-from .Particles import Particles
+import scipy.stats.maxwell.rvs as maxwell
+import Particles
 
 class Environment:
     """
@@ -92,7 +93,6 @@ class Environment:
         down_wall = np.array([window[0], window[1], room[2], window[2]])
         return up_wall, down_wall
 
-
     def boundary_bounce(self,particle, room_size = None, in_bound = True):
         """
         This function will simulate how particles interact with the boundary(wall).
@@ -132,8 +132,25 @@ class Environment:
         return pos, vel
 
     def heat_zone_add_tmperature(self, particle, T = 310):
-        #TODO
-        pass
+        """
+        This function will simulate the heat zone increasing the temperature of the particles.
+        particle: a Particles object
+        T: temperature of the heat zone
+        """
+        kB = 1.38064852e-23
+        m  = particle.mass
+        pos = particle.pos
+        vel = particle.vel
+        new_vel = vel.copy()
+        v = np.linalg.norm(vel[mask], axis = 1)
+        # calculate the temperature of the particles
+        T_from_vel = m * v**2 / (3 * kB)
+        # check which particles are in the heat zone
+        mask = self.is_the_particle_in_the_zone(pos, self.heat_zone)
+        T_from_vel[mask]  = maxwell(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
+        new_vel[mask,0] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,0] / v
+        new_vel[mask,1] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,1] / v
+        return new_vel
 
     def ac_suck_behavior(self,particle):
         """
@@ -153,8 +170,8 @@ class Environment:
         particle: a Particles object
         T : temperature of the air ac blows out
         """
-        kB = 1.38064852e-23
-        m  = particle.mass
+        kB  = 1.38064852e-23
+        m   = particle.mass
         pos = particle.pos
         vel = particle.vel
         blow_hole = self.ac_blow_hole
@@ -163,8 +180,10 @@ class Environment:
         # change the velocity of the particles in the suck hole.
         pos[mask, 0] = np.random.uniform(blow_hole[0], blow_hole[1], size=np.sum(mask))
         pos[mask, 1] = np.random.uniform(blow_hole[2], blow_hole[3], size=np.sum(mask))
-        vel[mask, 0] = np.sqrt(8 * kB * T / np.pi / m)
-        vel[mask, 1] = 0
+        v_from_T     = maxwell(scale = np.sqrt(kB * T / m), size = 1)
+        theta_for_v  = np.random.uniform(-np.pi, np.pi, size=np.sum(mask))
+        vel[mask, 0] = v_from_T * np.cos(theta_for_v)
+        vel[mask, 1] = v_from_T * np.sin(theta_for_v)
         
         return pos, vel
         

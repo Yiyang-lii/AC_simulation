@@ -23,7 +23,7 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.step = 0 
+        self.step = 0
         self.pos = np.zeros((n,2))
         self.vel = np.zeros((n,2))
         return
@@ -37,16 +37,16 @@ class Particles:
         room_size: size of the room [xmin,xmax,ymin,ymax]
         type: type of distribution (uniform, normal)
         """
-        room_size=self.room_size
-        n=self.nparticles
-        type=self.pos_type
-        xmin,xmax,ymin,ymax=room_size
-        if type=='uniform':
-            self.pos[:,0]= np.random.uniform(xmin,xmax,(n)) 
-            self.pos[:,1]= np.random.uniform(ymin,ymax,(n))
+        room_size = self.room_size
+        n = self.nparticles
+        type = self.pos_type
+        xmin,xmax,ymin,ymax = room_size
+        if type == 'uniform':
+            self.pos[:,0] = np.random.uniform(xmin,xmax,(n)) 
+            self.pos[:,1] = np.random.uniform(ymin,ymax,(n))
         elif type=='normal':
-            self.pos[:,0]= np.random.normal((xmin+xmax)/2,(xmax-xmin)/6,(n))
-            self.pos[:,1]= np.random.normal((ymin+ymax)/2,(ymax-ymin)/6,(n))
+            self.pos[:,0] = np.random.normal((xmin+xmax)/2,(xmax-xmin)/6,(n))
+            self.pos[:,1] = np.random.normal((ymin+ymax)/2,(ymax-ymin)/6,(n))
         return
 
 
@@ -85,13 +85,13 @@ class Particles:
         molecular_weight: molecular weight of the particles(amu) ex.air=28.9
         particles_radius: radius of the particles(0.1nm=1e-10m) ex.air=1.55
         """
-        self.mass=const.physical_constants['atomic mass constant'][0]*molecular_weight
-        self.particles_radius=particles_radius
-        self.T=T
-        self.room_size=room_size
-        self.pos_type=pos_type
-        self.vel_type=vel_type
-        self.molecular_weight=molecular_weight
+        self.mass = const.physical_constants['atomic mass constant'][0]*molecular_weight
+        self.particles_radius = particles_radius
+        self.T = T
+        self.room_size = room_size
+        self.pos_type = pos_type
+        self.vel_type = vel_type
+        self.molecular_weight = molecular_weight
         self.vel_distrib()
         self.pos_distrib()
         return

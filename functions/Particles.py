@@ -23,9 +23,9 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.time = 0
-        self.pos=np.zeros((n,2))
-        self.vel=np.zeros((n,2))
+        self.step = 0
+        self.pos = np.zeros((n,2))
+        self.vel = np.zeros((n,2))
         return
 
     
@@ -37,16 +37,16 @@ class Particles:
         room_size: size of the room [xmin,xmax,ymin,ymax]
         type: type of distribution (uniform, normal)
         """
-        room_size=self.room_size
-        n=self.nparticles
-        type=self.pos_type
-        xmin,xmax,ymin,ymax=room_size
-        if type=='uniform':
-            self.pos[:,0]= np.random.uniform(xmin,xmax,(n)) 
-            self.pos[:,1]= np.random.uniform(ymin,ymax,(n))
+        room_size = self.room_size
+        n = self.nparticles
+        type = self.pos_type
+        xmin,xmax,ymin,ymax = room_size
+        if type == 'uniform':
+            self.pos[:,0] = np.random.uniform(xmin,xmax,(n)) 
+            self.pos[:,1] = np.random.uniform(ymin,ymax,(n))
         elif type=='normal':
-            self.pos[:,0]= np.random.normal((xmin+xmax)/2,(xmax-xmin)/6,(n))
-            self.pos[:,1]= np.random.normal((ymin+ymax)/2,(ymax-ymin)/6,(n))
+            self.pos[:,0] = np.random.normal((xmin+xmax)/2,(xmax-xmin)/6,(n))
+            self.pos[:,1] = np.random.normal((ymin+ymax)/2,(ymax-ymin)/6,(n))
         return
 
 
@@ -125,18 +125,16 @@ class Particles:
                 vel[i]=np.dot(vel[i],R)
         return vel
 
-    if __name__ == "__main__":
-        import numpy as np
-        from Particles import Particles
-        from DataProcesser import DataProcesser
-        import numba as nb
-        nthreads = 8
-        nb.set_num_threads(nthreads)
-        particles_number=10
-        particles=Particles(particles_number)
-        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
-        print(Particles.count_average_T(particles)) 
-        print(particles.vel)
-        Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
-        print(particles.vel)
+if __name__ == "__main__":
+    import numpy as np
+    from Particles import Particles
+    from DataProcesser import DataProcesser
+    import numba as nb
+    nthreads = 8
+    nb.set_num_threads(nthreads)
+    particles_number=10
+    particles=Particles(particles_number)
+    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
+    Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
+
 

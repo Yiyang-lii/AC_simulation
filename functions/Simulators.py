@@ -2,21 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numba as nb
+from envtest import Environment
 # from Environment import Environment
 from Particles import Particles
-# from DataProcesser import DataProcesser
+from DataProcesser import DataProcesser
 
 class Simulators:
     """
     Class simulator is base on the simulator we have on class. Which can simulate the evolution of particles.
     """
-    def __init__(self, particle: Particles):
+    def __init__(self, particles: Particles, env: Environment):
         #TODO
-        self.particle = particle
-        # self.data = DataProcesser()
-        # self.Environment = Environment()
+        self.particles = particles
+        self.env = env
 
-    def evolve(self, dt:float, tmax:float, collision=False, resume=False):
+    def evolve(self, dt=0.01, collision=False):
         """
         Start to evolve the system
 
@@ -25,31 +25,25 @@ class Simulators:
         
         """
         #TODO
-        self.time = self.particle.time
-        self.tmax = tmax
-        self.time_arr = np.linspace(self.time, tmax, int(tmax/dt)+1) 
+        
         # future work: try to read the last output file and resume if something unexpected interrupted the simulation
         # such as: if (previous output exist == true && resume == true), then start from last output
         
-        for i in range(len(self.time_arr)):
-            # if i % 100 == 0:
-            #     print("time: ", self.time_arr[i])
-            #     print("pos: ", self.particle.pos)
-            #     print()
-            #     print("vel: ", self.particle.vel)
-            #     print()
-            self.next_step(dt)
-            if collision:
-                self.next_step_collision(dt)
+        self.next_step(dt)
+        if collision:
+            self.next_step_collision(dt)
            
 
     def next_step(self, dt:float):
         """
         This function will calculate the next step of the simulation.
         """
-        #TODO
-        self.time += dt
-        self.particle.pos += self.particle.vel * dt
+        # get the next position and velocity of the particles
+        self.particles.pos += self.particles.vel * dt 
+        # check whether particles bounce on the wall
+        self.particles.pos, self.particles.vel = self.env.boundary_bounce(self.particles, room_size=self.env.room_size, in_bound=True)
+        # rotate the particles located near the suck zone
+        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=25, source_point=(0, 0))
 
 
     def next_step_collision(self, dt:float):
@@ -65,17 +59,41 @@ if __name__ == "__main__":
     nb.set_num_threads(nthreads)
 
     dt = 0.01
+    t_init = 0
     tmax = 10
     
     particles_number = 10
     particles = Particles(particles_number)
-    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
+    particles.set_particles(pos_type='uniform', vel_type='Boltzmann', \
+                            room_size=[0,50,0,50], T=300, molecular_weight=28.9) 
     
     print("init pos:\n", particles.pos)
     print()
-    print("init vel:\n" ,particles.vel)
+    print("init vel:\n", particles.vel)
     print()
-    simulation = Simulators(particles)
-    simulation.evolve(dt=dt, tmax=tmax, collision=False, resume=False)
 
+    particles.vel[:, 0] *= 0.1
+    particles.vel[:, 1] *= 0.1 
+    
+    envir = Environment(room_size=[0,50,0,50],  \
+                        heat_zone_size=[25,25,25,25], open_window=2)
+    
+    simulation = Simulators(particles, envir)
+    
+    time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
+    for i in range(len(time_arr)):
+        particles.step = i
+        simulation.evolve(dt=dt, collision=False)
+        # if i % 10 == 0:
+        #     print("time: ", time_arr[i])
+        #     print("vel:\n", particles.vel)
+        #     print()
+    
+        if i % 100 == 0:    
+            # plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
+            # plt.title(f"Particles distribution, t = {time_arr[i]}")
+            # plt.show()
+            # plt.savefig(f"/Users/yiyangli/AC_simulation/functions/figures/Particles_distribution_{time_arr[i]}.png")
+    
+            DataProcesser.data_output(particles, "data", "test_rotate")

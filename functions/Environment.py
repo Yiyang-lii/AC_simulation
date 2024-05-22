@@ -93,26 +93,26 @@ class Environment:
         down_wall = np.array([window[0], window[1], room[2], window[2]])
         return up_wall, down_wall
 
-    def boundary_bounce(self,particle, room_size = None, in_bound = True):
+    def boundary_bounce(self,particles, room_size = None, in_bound = True):
         """
         This function will simulate how particles interact with the boundary(wall).
-        particle: a Particles object
+        particles: a Particles object
         room_size: size of the room [xmin,xmax,ymin,ymax] = self.room_size if not specified
-        in_bound: True if the particle is inside the boundary, False if the particle is outside the boundary
+        in_bound: True if the particles is inside the boundary, False if the particles is outside the boundary
         """
-        pos = particle.pos
-        vel = particle.vel
+        pos = particles.pos
+        vel = particles.vel
         if room_size is not None:
             self.room_size = room_size
         r_pos = room_size
-        # check if the particle is out of the boundary for in_bound senario
+        # check if the particles is out of the boundary for in_bound senario
         if in_bound:
             mask1 = pos[:, 0] <= r_pos[0]
             mask2 = pos[:, 0] >= r_pos[1]
             mask3 = pos[:, 1] <= r_pos[2]
             mask4 = pos[:, 1] >= r_pos[3]
         else:
-        # check if the particle is in the boundary for out_bound senario
+        # check if the particles is in the boundary for out_bound senario
             mask1 = pos[:, 0] >= r_pos[0]
             mask2 = pos[:, 0] <= r_pos[1]
             mask3 = pos[:, 1] >= r_pos[2]
@@ -131,16 +131,16 @@ class Environment:
         vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
 
-    def heat_zone_add_tmperature(self, particle, T = 310):
+    def heat_zone_add_tmperature(self, particles, T = 310):
         """
         This function will simulate the heat zone increasing the temperature of the particles.
-        particle: a Particles object
+        particles: a Particles object
         T: temperature of the heat zone
         """
         kB = 1.38064852e-23
-        m  = particle.mass
-        pos = particle.pos
-        vel = particle.vel
+        m  = particles.mass
+        pos = particles.pos
+        vel = particles.vel
         new_vel = vel.copy()
         v = np.linalg.norm(vel[mask], axis = 1)
         # calculate the temperature of the particles
@@ -152,28 +152,28 @@ class Environment:
         new_vel[mask,1] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,1] / v
         return new_vel
 
-    def ac_suck_behavior(self,particle):
+    def ac_suck_behavior(self,particles):
         """
         This function will simulate the air conditioner sucking air. Which will turn the velocity of the 
         particles more towards the air conditioner suck hole.
-        particle: a Particles object
+        particles: a Particles object
         """
         source = self.ac_suck_hole_dot
         radius = self.suck_zone_radius
-        pos = particle.pos
-        vel = particle.vel
+        pos = particles.pos
+        vel = particles.vel
         return Particles.rotate_particles(pos,vel,radius,source)
 
-    def ac_suck_and_blow(self, particle, T = 298):
+    def ac_suck_and_blow(self, particles, T = 298):
         """
         This function will simulate the air conditioner sucking air and blowing air.
-        particle: a Particles object
+        particles: a Particles object
         T : temperature of the air ac blows out
         """
         kB  = 1.38064852e-23
-        m   = particle.mass
-        pos = particle.pos
-        vel = particle.vel
+        m   = particles.mass
+        pos = particles.pos
+        vel = particles.vel
         blow_hole = self.ac_blow_hole
         # check which particles are in the suck hole
         mask = self.is_the_particle_in_the_zone(pos, self.ac_suck_hole)
@@ -190,8 +190,8 @@ class Environment:
     @staticmethod
     def is_the_particle_in_the_zone(pos, zone):
         """
-        This function will check if the particle is in the zone.
-        pos: position of the particle. np.array([x,y])
+        This function will check if the particles is in the zone.
+        pos: position of the particles. np.array([x,y])
         zone: zone of the room. [xmin,xmax,ymin,ymax]
         """
         return (pos[:,0] > zone[0] and pos[:,0] < zone[1] and pos[:,1] > zone[2] and pos[:,1] < zone[3])

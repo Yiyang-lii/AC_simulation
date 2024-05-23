@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numba as nb
-from envtest import Environment
+from functions.envtest import Environment
 # from Environment import Environment
-from Particles import Particles
-from DataProcesser import DataProcesser
-
+from functions.Particles import Particles
+from functions.DataProcesser import DataProcesser
+import os
 class Simulators:
     """
     Class simulator is base on the simulator we have on class. Which can simulate the evolution of particles.
@@ -43,7 +43,7 @@ class Simulators:
         # check whether particles bounce on the wall
         self.particles.pos, self.particles.vel = self.env.boundary_bounce(self.particles, room_size=self.env.room_size, in_bound=True)
         # rotate the particles located near the suck zone
-        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=25, source_point=(0, 0))
+        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=10, source_point=(0, 0))
 
 
     def next_step_collision(self, dt:float):
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     t_init = 0
     tmax = 10
     
-    particles_number = 10
+    particles_number = 100000
     particles = Particles(particles_number)
     particles.set_particles(pos_type='uniform', vel_type='Boltzmann', \
                             room_size=[0,50,0,50], T=300, molecular_weight=28.9) 
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     print("init vel:\n", particles.vel)
     print()
 
-    particles.vel[:, 0] *= 0.1
-    particles.vel[:, 1] *= 0.1 
+    #particles.vel[:, 0] *= 0.1
+    #particles.vel[:, 1] *= 0.1 
     
     envir = Environment(room_size=[0,50,0,50],  \
                         heat_zone_size=[25,25,25,25], open_window=2)
@@ -85,15 +85,19 @@ if __name__ == "__main__":
     for i in range(len(time_arr)):
         particles.step = i
         simulation.evolve(dt=dt, collision=False)
-        # if i % 10 == 0:
-        #     print("time: ", time_arr[i])
-        #     print("vel:\n", particles.vel)
-        #     print()
+        if i % 10 == 0:
+            print("time: ", time_arr[i])
+            print("vel:\n", particles.vel)
+            print()
     
-        if i % 100 == 0:    
-            # plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
-            # plt.title(f"Particles distribution, t = {time_arr[i]}")
-            # plt.show()
-            # plt.savefig(f"/Users/yiyangli/AC_simulation/functions/figures/Particles_distribution_{time_arr[i]}.png")
+        if i % 50 == 0:    
+            plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
+            plt.title(f"Particles distribution, t = {time_arr[i]}")
+            #plt.show()
+
+            
+            if  not os.path.exists('functions/figures'):
+                os.mkdir('functions/figures')
+            plt.savefig(f"functions/figures/Particles_distribution_{time_arr[i]}.png")
     
             DataProcesser.data_output(particles, "data", "test_rotate")

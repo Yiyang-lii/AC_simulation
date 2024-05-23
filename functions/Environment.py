@@ -147,7 +147,7 @@ class Environment:
         T_from_vel = m * v**2 / (3 * kB)
         # check which particles are in the heat zone
         mask = self.is_the_particle_in_the_zone(pos, self.heat_zone)
-        T_from_vel[mask]  = stats.maxwell(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
+        T_from_vel[mask]  = stats.maxwell.rvs(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
         new_vel[mask,0] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,0] / v
         new_vel[mask,1] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,1] / v
         return new_vel

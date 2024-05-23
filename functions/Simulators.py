@@ -7,6 +7,7 @@ from functions.envtest import Environment
 from functions.Particles import Particles
 from functions.DataProcesser import DataProcesser
 import os
+from scipy.spatial.distance import pdist, squareform
 class Simulators:
     """
     Class simulator is base on the simulator we have on class. Which can simulate the evolution of particles.
@@ -29,30 +30,51 @@ class Simulators:
         # future work: try to read the last output file and resume if something unexpected interrupted the simulation
         # such as: if (previous output exist == true && resume == true), then start from last output
         
-        self.next_step(dt)
-        if collision:
-            self.next_step_collision(dt)
+        self.next_step(dt,collision=collision)
            
 
-    def next_step(self, dt:float):
+    def next_step(self,dt:float,collision=False):
         """
         This function will calculate the next step of the simulation.
         """
+        source_point = self.env.ac_suck_hole_dot
+        zone_radius = self.env.suck_zone_radius
+        
         # get the next position and velocity of the particles
         self.particles.pos += self.particles.vel * dt 
         # check whether particles bounce on the wall
         self.particles.pos, self.particles.vel = self.env.boundary_bounce(self.particles, room_size=self.env.room_size, in_bound=True)
+        # 
+        if collision:
+            critical_distance = 2 * self.particles.particles_radius 
+            self.collision(critical_distance)
         # rotate the particles located near the suck zone
-        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=10, source_point=(0, 0))
+        self.particles.vel = Particles.rotate_particles(self.particles.pos, self.particles.vel, zone_radius=zone_radius, source_point=source_point)
 
 
-    def next_step_collision(self, dt:float):
+    def collision(self, critical_distance: float):
         """
         This function will calculate the next step of the simulation with collision.
         """
-        #TODO
-        pass
+        # 找到碰撞的小球 (dist < 2 * self.r)
+        # dist[i][j] 表示小球 i 和 j 的距离
+        dist = squareform(pdist(self.particles.pos))
+        iarr, jarr = np.where(dist < 2 * critical_distance)
+        k = iarr < jarr
+        iarr, jarr = iarr[k], jarr[k]
 
+        # 刚体碰撞速度公式，考虑弹性碰撞以及相同质量做简化
+        # https://github.com/phenomLi/Blog/issues/35
+        for i, j in zip(iarr, jarr):
+            pos_i, vel_i = self.particles.pos[i], self.particles.vel[i]
+            pos_j, vel_j = self.particles.pos[j], self.particles.vel[j]
+            r_ij, v_ij = pos_i - pos_j, vel_i - vel_j
+            r_dot_r = r_ij @ r_ij
+            v_dot_r = v_ij @ r_ij
+            Jn = -v_dot_r * r_ij / r_dot_r
+            self.particles.vel[i] += Jn
+            self.particles.vel[j] -= Jn
+    
 if __name__ == "__main__":
     
     nthreads = 2

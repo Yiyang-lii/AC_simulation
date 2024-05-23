@@ -207,7 +207,7 @@ class DataProcesser:
                     print(f'Creating the folder "data" under current directory.')
                 else:
                     filepath='./data'       
-        step="{:04}".format(particles.step)
+        step="{:05}".format(particles.step)
         path=f'{filepath}/{filename}_t{step}.bin'
         with open(path, 'wb') as file:
             pickle.dump(particles, file)
@@ -259,7 +259,7 @@ class DataProcesser:
 
     
     @staticmethod
-    def load_files(header,pattern='[0-9][0-9][0-9][0-9]'):
+    def load_files(header,pattern='[0-9][0-9][0-9][0-9][0-9]'):
         import glob
         """
         Load the data from the output file

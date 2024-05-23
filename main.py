@@ -7,15 +7,15 @@ from functions.Simulators import Simulators
 
 nthreads = 8
 nb.set_num_threads(nthreads)
-particles_number=10000
+particles_number=1000000
 particles=Particles(particles_number)
-particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particles_radius=1.55,molecular_weight=28.9)
+particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,particles_radius=0.1,molecular_weight=28.9)
    
 
-dt = 0.01
+dt = 0.001
 t_init = 0
-tmax = 10
-particles_number = 100000
+tmax = 0.5
+particles_number = 1000
 particles = Particles(particles_number)
 particles.set_particles(pos_type='uniform', vel_type='Boltzmann', \
                         room_size=[0,50,0,50], T=300, molecular_weight=28.9) 
@@ -37,13 +37,14 @@ time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
 for i in range(len(time_arr)):
     particles.step = i
-    simulation.evolve(dt=dt, collision=False)
-    if i % 10 == 0:
-        print("time: ", time_arr[i])
-        print("vel:\n", particles.vel)
-        print()
+    simulation.evolve(dt=dt, collision=True)
+    #if i % 10 == 0:
+    #    print("time: ", time_arr[i])
+    #    print("vel:\n", particles.vel)
+    #    print()
 
-    if i % 50 == 0:    
+    if i % 1 == 0:  
+        print("time: ", time_arr[i])  
         #plt.scatter(particles.pos[:, 0], particles.pos[:, 1], )
         #plt.title(f"Particles distribution, t = {time_arr[i]}")
         #plt.show()
@@ -52,10 +53,11 @@ for i in range(len(time_arr)):
         #if  not os.path.exists('functions/figures'):
         #    os.mkdir('functions/figures')
         #plt.savefig(f"functions/figures/Particles_distribution_{time_arr[i]}.png")
-        particles.T=Particles.count_average_T(particles)
+        #particles.T=Particles.count_average_T(particles)
         DataProcesser.data_output(particles, "data", "test_rotate")
 particles=DataProcesser.data_input('data/test_rotate_t1000.bin')
 
-DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
+#DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
 fns=DataProcesser.load_files('test_rotate')        
-DataProcesser.output_movie(fns, resolution=100, sigma=5, filename="test_rotate.mp4", fps=2, plot_func="plot_gas_temperature")
+#DataProcesser.output_movie(fns, resolution=200, sigma=5, filename="temperature.mp4", fps=10, plot_func="plot_gas_temperature")
+DataProcesser.output_movie(fns, resolution=200, sigma=0, filename="number_density.mp4", fps=1, plot_func="plot_gas_number_density")

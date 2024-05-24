@@ -24,6 +24,7 @@ class Particles:
         """
         self.nparticles = n
         self.step = 0
+        self.dt = 0
         self.pos = np.zeros((n,2))
         self.vel = np.zeros((n,2))
         return

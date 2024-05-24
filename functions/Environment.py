@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 import scipy.stats as stats
 from functions.Particles import Particles
+import scipy.constants as const
 
 class Environment:
     """
@@ -33,13 +34,13 @@ class Environment:
         self.window = np.array([heat_zone_size[0],heat_zone_size[0],\
                                 window_dot - open_window/2, window_dot + open_window/2])
 
-    def set_room_size(self, room_size):
-        """
-        Can modify the size of the room.
-        room_size: [xmin,xmax,ymin,ymax]
-        """
-        self.room_size = np.array(room_size)
-        return
+    #def set_room_size(self, room_size):
+    #    """
+    #    Can modify the size of the room.
+    #    room_size: [xmin,xmax,ymin,ymax]
+    #    """
+    #    self.room_size = np.array(room_size)
+    #    return
 
     def set_ac_suck_hole(self, ac_suck_hole):
         """
@@ -131,13 +132,13 @@ class Environment:
         vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
 
-    def heat_zone_add_tmperature(self, particles, T = 310):
+    def heat_zone_add_temperature(self, particles, T = 310):
         """
         This function will simulate the heat zone increasing the temperature of the particles.
         particles: a Particles object
         T: temperature of the heat zone
         """
-        kB = 1.38064852e-23
+        kB = const.Boltzmann
         m  = particles.mass
         pos = particles.pos
         vel = particles.vel
@@ -170,7 +171,7 @@ class Environment:
         particles: a Particles object
         T : temperature of the air ac blows out
         """
-        kB  = 1.38064852e-23
+        kB = const.Boltzmann
         m   = particles.mass
         pos = particles.pos
         vel = particles.vel

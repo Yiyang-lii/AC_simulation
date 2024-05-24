@@ -194,19 +194,12 @@ class DataProcesser:
     def data_output(particles, filepath,filename):
         """
         This function will output the data into a binary file.
+        particles: The particles object.
+        filepath: The path of the file. ex. 'data'
+        filename: The name of the file. ex. 'particles' 
         """
         if  not os.path.exists(filepath):
-            try:
-                os.mkdir(filepath)
-                print(f'Seems like the folder of {filepath} does not exist. Creating it now.')
-            except :
-                print(f'Over one folder does not exist along {filepath}. Please check your path.\n \
-                      To prevent the data from deleted, the file will be saved in the  folder "data" under current directory.')
-                if  not os.path.exists('./data'):
-                    os.mkdir('./data')
-                    print(f'Creating the folder "data" under current directory.')
-                else:
-                    filepath='./data'       
+            os.makedirs(filepath)
         step="{:05}".format(particles.step)
         path=f'{filepath}/{filename}_t{step}.bin'
         with open(path, 'wb') as file:
@@ -218,6 +211,7 @@ class DataProcesser:
         """
         This function will input the data from the file and return the particles object.
         The file should be a binary file.
+        filepath: The path of the file. ex. 'data/particles_t00000.bin'
         """
         path=f'{filepath}'
         if  not os.path.exists(path):
@@ -259,14 +253,16 @@ class DataProcesser:
 
     
     @staticmethod
-    def load_files(header,pattern='[0-9][0-9][0-9][0-9][0-9]'):
+    def load_files(filepath,header,pattern='[0-9][0-9][0-9][0-9][0-9]'):
         import glob
         """
         Load the data from the output file
+        filepath: string, the path of the output file ex. 'data'
         header: string, the header of the output file
+
         """
 
-        fns=f'data/{header}_t{pattern}.bin'
+        fns=f'{filepath}/{header}_t{pattern}.bin'
         fns = glob.glob(fns)
         fns.sort()
         print(fns)  

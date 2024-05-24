@@ -142,16 +142,13 @@ class Environment:
         m  = particles.mass
         pos = particles.pos
         vel = particles.vel
-        new_vel = vel.copy()
-        v = np.linalg.norm(vel[mask], axis = 1)
-        # calculate the temperature of the particles
-        T_from_vel = m * v**2 / (3 * kB)
         # check which particles are in the heat zone
         mask = self.is_the_particle_in_the_zone(pos, self.heat_zone)
-        T_from_vel[mask]  = stats.maxwell.rvs(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
-        new_vel[mask,0] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,0] / v
-        new_vel[mask,1] = np.sqrt(3 * kB * T_from_vel[mask] / m) * vel[mask,1] / v
-        return new_vel
+        factor = np.array([np.zeros(len(vel[mask]))])
+        for i in range(len(vel[mask])):
+            factor[0][i]=np.linalg.norm(vel[mask][i])/stats.maxwell.rvs(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
+        vel[mask]=factor.T*vel[mask]
+        return vel
 
     def ac_suck_behavior(self,particles):
         """
@@ -179,13 +176,13 @@ class Environment:
         # check which particles are in the suck hole
         mask = self.is_the_particle_in_the_zone(pos, self.ac_suck_hole)
         # change the velocity of the particles in the suck hole.
-        pos[mask, 0] = np.random.uniform(blow_hole[0], blow_hole[1], size=np.sum(mask))
-        pos[mask, 1] = np.random.uniform(blow_hole[2], blow_hole[3], size=np.sum(mask))
-        v_from_T     = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size = 1)
-        theta_for_v  = np.random.uniform(-np.pi, np.pi, size=np.sum(mask))
-        vel[mask, 0] = v_from_T * np.cos(theta_for_v)
-        vel[mask, 1] = v_from_T * np.sin(theta_for_v)
-        
+        blow_particle_number = len(pos[mask, 0])
+        pos[mask, 0] = np.random.uniform(blow_hole[0], blow_hole[1], size=blow_particle_number)
+        pos[mask, 1] = np.random.uniform(blow_hole[2], blow_hole[3], size=blow_particle_number)
+        v_cold     = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size=blow_particle_number)
+        theta = np.random.uniform(-1/3*np.pi, 1/3*np.pi, blow_particle_number)
+        vel[mask, 0] = v_cold * np.cos(theta)
+        vel[mask, 1] = v_cold * np.sin(theta)
         return pos, vel
         
     @staticmethod
@@ -195,7 +192,8 @@ class Environment:
         pos: position of the particles. np.array([x,y])
         zone: zone of the room. [xmin,xmax,ymin,ymax]
         """
-        return (pos[:,0] > zone[0] and pos[:,0] < zone[1] and pos[:,1] > zone[2] and pos[:,1] < zone[3])
+        test =( (pos[:,0] > zone[0]) & (pos[:,0] < zone[1]) & (pos[:,1] > zone[2]) & (pos[:,1] < zone[3]))
+        return test
 
 
     

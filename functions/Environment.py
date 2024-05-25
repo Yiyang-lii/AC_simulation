@@ -197,6 +197,4 @@ class Environment:
         return (pos[:,0] > zone[0] and pos[:,0] < zone[1] and pos[:,1] > zone[2] and pos[:,1] < zone[3])
 
 
-    
-
 

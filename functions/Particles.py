@@ -23,7 +23,8 @@ class Particles:
         Create empty lists for every property of the particles.
         """
         self.nparticles = n
-        self.time = 0
+        self.step = 0
+        self.dt = 0
         self.pos = np.zeros((n,2))
         self.vel = np.zeros((n,2))
         return
@@ -75,7 +76,7 @@ class Particles:
             return ValueError('Distribution type not supported')
         return
     
-    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9,particles_radius='None'):
+    def set_particles(self,pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9,particles_radius=0.1):
         """
         This function will set the properties of particles.
         pos_type: type of position distribution (uniform, normal)
@@ -83,7 +84,7 @@ class Particles:
         room_size: size of the room [xmin,xmax,ymin,ymax]
         T: temperature of the particles(K) ex.room temperature=300
         molecular_weight: molecular weight of the particles(amu) ex.air=28.9
-        particles_radius: radius of the particles(0.1nm=1e-10m) ex.air=1.55
+        particles_radius: radius of the particles
         """
         self.mass = const.physical_constants['atomic mass constant'][0]*molecular_weight
         self.particles_radius = particles_radius
@@ -102,8 +103,8 @@ class Particles:
         """
         return np.mean(np.linalg.norm(self.vel, axis=1)**2*self.mass/(3*const.Boltzmann))
     
-    
-    @nb.njit(parallel=True)
+    @staticmethod
+    #@nb.njit(parallel=True)
     def rotate_particles(pos:list,vel:list,zone_radius,source_point):
         """
         This function will rotate the particles by an angle theta.
@@ -112,28 +113,30 @@ class Particles:
         zone_radius: radius of the zone
         source_point: point of the source
         """
-      
-        for i in nb.prange(len(pos[0])):
+        for i in nb.prange(len(pos[:,0])):
             point_vector=np.array(source_point)-pos[i]
             distance=np.linalg.norm(point_vector)
             if distance>zone_radius:
                 continue   
             else:
-                theta=np.arccos(vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance
+                theta=np.arccos(vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance**0.5
                 c, s = np.cos(theta), np.sin(theta)
                 R = np.array([[c, -s], [s, c]])
-                vel[i]=np.dot(vel[i],R)
+                vel[i]=vel[i]@R
         return vel
 
-    if __name__ == "__main__":
-        import numpy as np
-        from Particles import Particles
-        from DataProcesser import DataProcesser
-        import numba as nb
-        nthreads = 8
-        nb.set_num_threads(nthreads)
-        particles_number=10
-        particles=Particles(particles_number)
-        particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,50,0,50],T=300,molecular_weight=28.9) 
-        Particles.rotate_particles(particles.pos,particles.vel,zone_radius=25,source_point=(0,0))
+if __name__ == "__main__":
+    import numpy as np
+    from Particles import Particles
+    from DataProcesser import DataProcesser
+    import numba as nb
+    nthreads = 8
+    nb.set_num_threads(nthreads)
+    particles_number=10
+    particles=Particles(particles_number)
+    particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=[0,5000,0,5000],T=300,molecular_weight=28.9) 
+    print("init vel:\n", particles.vel)
+    particles.vel=Particles.rotate_particles(particles.pos,particles.vel,zone_radius=4000,source_point=(0,0))
+    print("after rotate:\n", particles.vel)
+
 

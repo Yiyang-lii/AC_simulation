@@ -266,6 +266,36 @@ class DataProcesser:
         print('fns=',fns)
         return fns
 
+    @staticmethod
+    def plot_multi_zones(zone_size = [np.array([0,1,0,1])], color = ['r']):
+        """
+        This finction will plot the zones in the room.
+        zone_size: list with numpy list as elements, the size of the zone ex. [np.[xmin,xmax,ymin,ymax],...]
+        n_zone: int, the number of zones
+        color: list with string as elements, the color of the zone ex. ['r','b',...]
+
+        more information about the zone_size:
+        1. If the zone is a rectangle, the zone_size should be a numpy array with 4 elements [xmin,xmax,ymin,ymax]
+        2. If the zone is a circle, the zone_size should be a numpy array with 3 elements [radius,center_position,angle_range]
+        """
+        plt.figure()
+        for n, zone in enumerate(zone_size):
+            if len(zone) == 4:  
+                x = [zone[0],zone[1],zone[1],zone[0]]
+                y = [zone[2],zone[2],zone[3],zone[3]]
+                plt.fill(x,y,color[n])
+            elif len(zone) == 3:
+                theta = np.linspace(zone[2][0], zone[2][1], 100)
+                x = zone[1][0] + zone[0] * np.cos(theta)
+                y = zone[1][1] + zone[0] * np.sin(theta)
+                plt.fill(x, y, color[n])
+            else:
+                print(f'{zone} is a invalid zone size. Please check your zone size.')
+                continue
+        plt.show()
+
+        
+
 
 if __name__ == '__main__':
     import numpy as np

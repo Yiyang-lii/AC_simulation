@@ -41,6 +41,7 @@ class Environment:
         self.room_size = np.array(room_size)
         return
 
+
     def set_ac_suck_hole(self, ac_suck_hole):
         """
         Can modify the position of the air conditioner suck hole.

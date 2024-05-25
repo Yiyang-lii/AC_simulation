@@ -97,13 +97,13 @@ class DataProcesser:
         cb.set_label('Number of Particles in one bin')
         plt.xlabel('X (m)')
         plt.ylabel('Y (m)')
-        plt.title('2D Gas Number Density Distribution at t='+str(particles.step))
+        plt.title('2D Gas Number Density Distribution at t='+str("{:.2f}".format(particles.step*particles.dt)))
         if fig_save=='video':
             return 
         elif fig_save==True:
             if not os.path.exists('Gas_number_density_Distribution'):
                 os.mkdir('Gas_number_density_Distribution')
-            plt.savefig(f'Gas_number_density_Distribution/gas_number_density_resolution{resolution}_t{particles.step}.png')
+            plt.savefig(f'Gas_number_density_Distribution/gas_number_density_resolution{resolution}_t{"{:.2f}".format(particles.step*particles.dt)}.png')
             plt.close()
         elif fig_save==False:
             plt.show()
@@ -144,13 +144,13 @@ class DataProcesser:
         plt.colorbar(label='Temperature (K)')
         plt.xlabel('X (m)')
         plt.ylabel('Y (m)')
-        plt.title('2D Temperature Distribution at t='+str(particles.step))
+        plt.title('2D Temperature Distribution at t='+str("{:.2f}".format(particles.step*particles.dt)))
         if fig_save=='video':
             return 
         elif fig_save==True:
             if not os.path.exists('Tempturature_Distribution'):
                 os.mkdir('Tempturature_distribution')
-            plt.savefig(f'Tempturature_distribution/temperature_Distribution_resolution{resolution}_t{particles.step}.png')
+            plt.savefig(f'Tempturature_distribution/temperature_Distribution_resolution{resolution}_t{"{:.2f}".format(particles.step*particles.dt)}.png')
             plt.close()
         elif fig_save==False:
             plt.show()
@@ -238,11 +238,10 @@ class DataProcesser:
             fn = fns[frame]
             print('filepath=',fn)
             print('frame=',frame)
-    
             particles = DataProcesser.data_input(fn)    
             print('particles.step=',particles.step)
             if plot_func == 'plot_gas_temperature':
-                DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,fig_save='video')
+                DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,vmin=270,vmax=330,fig_save='video')
             elif plot_func == 'plot_gas_number_density':
                 DataProcesser.plot_gas_number_density(particles, resolution=resolution,sigma=sigma,fig_save='video')
             return
@@ -261,11 +260,10 @@ class DataProcesser:
         header: string, the header of the output file
 
         """
-
         fns=f'{filepath}/{header}_t{pattern}.bin'
         fns = glob.glob(fns)
         fns.sort()
-        print(fns)  
+        print('fns=',fns)
         return fns
 
 

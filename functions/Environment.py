@@ -1,8 +1,9 @@
 import numpy as np
 import scipy
 import scipy.stats as stats
-from functions.Particles import Particles
 import scipy.constants as const
+#from Particles import Particles
+from functions.Particles import Particles 
 
 class Environment:
     """
@@ -16,16 +17,16 @@ class Environment:
         """
         self.room_size     = np.array(room_size)
         self.heat_zone     = np.array(heat_zone_size)        
-        # define default ac suck hole
-        half_hole_length        = (room_size[3] - room_size[2])/4
+        half_hole_length        = (room_size[3] - room_size[2])/4 * 0.5
         buff_length             = half_hole_length*0.1
-        suck_hole_mid_dot       = (3*room_size[3] + room_size[2])/4
-        self.suck_zone_radius   = half_hole_length * 4
+        # define default ac suck hole
+        suck_hole_mid_dot       = (3*room_size[2] + room_size[3])/4
+        self.suck_zone_radius   = (room_size[3] - room_size[2])/4
         self.ac_suck_hole_dot   = np.array([room_size[0], suck_hole_mid_dot])
         self.ac_suck_hole       = np.array([room_size[0], room_size[0]+ buff_length,\
                                 suck_hole_mid_dot - half_hole_length, suck_hole_mid_dot + half_hole_length])
         # define default ac blow hole
-        blow_hole_mid_dot = (3*room_size[2] + room_size[3])/4
+        blow_hole_mid_dot       = (3*room_size[3] + room_size[2])/4
         self.ac_blow_hole_dot   = np.array([room_size[0], blow_hole_mid_dot])
         self.ac_blow_hole       = np.array([room_size[0], room_size[0] + buff_length,\
                                 blow_hole_mid_dot - half_hole_length, blow_hole_mid_dot + half_hole_length])
@@ -34,13 +35,13 @@ class Environment:
         self.window = np.array([heat_zone_size[0],heat_zone_size[0],\
                                 window_dot - open_window/2, window_dot + open_window/2])
 
-    #def set_room_size(self, room_size):
-    #    """
-    #    Can modify the size of the room.
-    #    room_size: [xmin,xmax,ymin,ymax]
-    #    """
-    #    self.room_size = np.array(room_size)
-    #    return
+    def set_room_size(self, room_size):
+        """
+        Can modify the size of the room.
+        room_size: [xmin,xmax,ymin,ymax]
+        """
+        self.room_size = np.array(room_size)
+        return
 
     def set_ac_suck_hole(self, ac_suck_hole):
         """

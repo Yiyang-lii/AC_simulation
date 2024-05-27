@@ -7,7 +7,8 @@ from functions.Simulators import Simulators
 import gc
 import datetime
 print('start_time=',datetime.datetime.today())
-nthreads = 20
+nthreads = 1
+
 nb.set_num_threads(nthreads)
 #'''
 #set environment

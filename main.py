@@ -11,13 +11,13 @@ nthreads = 1
 
 nb.set_num_threads(nthreads)
 #'''
-#set environment
+#set range of environment
 envir = Environment(room_size=[0,5000,0,5000],heat_zone_size=[2400,2500,0,2500])
 
 
 #set particles
-particles_number=10000
-particles=Particles(particles_number)
+particles_number = 1000
+particles = Particles(particles_number)
 particles.set_particles(pos_type='uniform', vel_type='Boltzmann',\
                         room_size=envir.room_size, T=310, particles_radius=1, molecular_weight=28.9)
    
@@ -47,11 +47,11 @@ for i in range(len(time_arr)):
     particles.dt=dt
     particles.step = i
     simulation.evolve(dt=dt, collision=False)
-    particles.pos,particles.vel=envir.ac_suck_and_blow(particles,T=290)
-    # particles.vel=envir.heat_zone_add_temperature(particles,T=310)
+    particles.pos,particles.vel = envir.ac_suck_and_blow(particles,T=290)
+    particles.vel = envir.heat_zone_add_temperature(particles,T=310)
 
     if i % 1 == 0:  
-        print("\r time: {:.2f}".format(particles.step*particles.dt) , end='')
+        print("\r simulated time: {:.2f} out of {} , len(v) = {}".format(particles.step*particles.dt, tmax, len(particles.vel)) , end='')
         #count average temperature of the particles in each step
         particles.T=Particles.count_average_T(particles)
         #save data in each step

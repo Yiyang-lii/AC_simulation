@@ -193,8 +193,8 @@ class Environment:
         pos: position of the particles. np.array([x,y])
         zone: zone of the room. [xmin,xmax,ymin,ymax]
         """
-        test =( (pos[:,0] > zone[0]) & (pos[:,0] < zone[1]) & (pos[:,1] > zone[2]) & (pos[:,1] < zone[3]))
-        return test
+        mask =( (pos[:,0] > zone[0]) & (pos[:,0] < zone[1]) & (pos[:,1] > zone[2]) & (pos[:,1] < zone[3]))
+        return mask
 
 
     

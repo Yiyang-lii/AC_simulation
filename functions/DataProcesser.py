@@ -236,10 +236,8 @@ class DataProcesser:
         def update(frame):
             plt.clf()
             fn = fns[frame]
-            print('filepath=',fn)
-            print('frame=',frame)
-            particles = DataProcesser.data_input(fn)    
-            print('particles.step=',particles.step)
+            particles = DataProcesser.data_input(fn)  
+            print(f'\r frame = {frame}, step={particles.step}, filepath = {fn}   ', end='')
             if plot_func == 'plot_gas_temperature':
                 DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,vmin=270,vmax=330,fig_save='video')
             elif plot_func == 'plot_gas_number_density':
@@ -263,7 +261,7 @@ class DataProcesser:
         fns=f'{filepath}/{header}_t{pattern}.bin'
         fns = glob.glob(fns)
         fns.sort()
-        print('fns=',fns)
+        # print('fns=',fns)
         return fns
 
     @staticmethod

@@ -25,9 +25,12 @@ class DataProcesser:
         """
         #TODO
         #plot the histogram of the data
+        mask = ~np.isnan(vel).any(axis=1)
+        vel =  vel[mask]
         speeds = np.linalg.norm(vel, axis=1) #calculate the magnitude of the speeds
+
         plt.hist(speeds, bins=50, alpha=0.6, color='g', density=True, label='Simulation') #plot the histogram of the data
-        
+        print(speeds)
         #create the theoretical distribution
         speeds_range = np.linspace(0, np.max(speeds), 100) #create 100 points from 0 to max speed
         theory_distribution = stats.maxwell.pdf(speeds_range, scale=np.sqrt(const.k*temperature / mass)) #apply the maxwell distribution
@@ -85,11 +88,13 @@ class DataProcesser:
         resolution: How many bins to divide the room into.Example: resolution=100 means the room is divided into 100*100 bins.
         sigma: The standard deviation of the Gaussian filter. Higer value will smooth the data more.
         """
+        mask = ~np.isnan(particles.pos).any(axis=1)
+        particles.pos =  particles.pos[mask]
         x = particles.pos[:, 0]
         y = particles.pos[:, 1]
         # Define resolution and room size
         room_size= particles.room_size
-        H, _, _ = np.histogram2d(x, y, bins=resolution)
+        H, _, _ = np.histogram2d(x, y ,bins=resolution)
         smoothed_H = gaussian_filter(H, sigma=sigma)
         vmax=particles.nparticles/(resolution**2)*2
         im=plt.imshow(smoothed_H.T, extent=room_size,vmin=0,vmax=vmax,cmap='gray', origin='lower')
@@ -218,7 +223,34 @@ class DataProcesser:
             return FileNotFoundError(f'The file {path} does not exist. Please check your path.')
         with open( path, 'rb') as file:       
             return pickle.load(file)
+    def output_particles_movie(fns, roomsize, filename='movie.mp4', fps=30):
+        plt.style.use('dark_background')
+        fig, ax = plt.subplots()
+        fig.set_linewidth(5)
+        fig.set_size_inches(10, 10, forward=True)
+        fig.set_dpi(72)
+        line, = ax.plot([], [], '.', color='w', markersize=5)
 
+        def init():
+            plt.xticks(fontsize=14)
+            plt.yticks(fontsize=14)
+            ax.set_xlim(roomsize[0],roomsize[1])
+            ax.set_ylim(roomsize[2],roomsize[3])
+            ax.set_aspect('equal')
+            ax.set_xlabel('X [code unit]', fontsize=18)
+            ax.set_ylabel('Y [code unit]', fontsize=18)
+            return line, 
+
+        def update(frame):
+            fn = fns[frame]
+            Particles=DataProcesser.data_input(fn)
+            line.set_data(Particles.pos[:,0], Particles.pos[:, 1])
+            plt.title("Frame =" + str(frame), size=18)
+            print('frame=',frame)
+            return line,
+        ani = animation.FuncAnimation(fig, update, frames=len(fns), init_func=init, blit=True)
+        ani.save(filename, writer='ffmpeg', fps=fps)
+        return
     @staticmethod
     def output_movie(fns, resolution=100, sigma=5, filename='movie.mp4', fps=30, plot_func='plot_gas_temperature'):
         """
@@ -263,7 +295,7 @@ class DataProcesser:
         fns=f'{filepath}/{header}_t{pattern}.bin'
         fns = glob.glob(fns)
         fns.sort()
-        print('fns=',fns)
+        #print('fns=',fns)
         return fns
 
 

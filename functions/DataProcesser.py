@@ -268,10 +268,8 @@ class DataProcesser:
         def update(frame):
             plt.clf()
             fn = fns[frame]
-            print('filepath=',fn)
-            print('frame=',frame)
-            particles = DataProcesser.data_input(fn)    
-            print('particles.step=',particles.step)
+            particles = DataProcesser.data_input(fn)  
+            print(f'\r frame = {frame}, step={particles.step}, filepath = {fn}   ', end='')
             if plot_func == 'plot_gas_temperature':
                 DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,vmin=270,vmax=330,fig_save='video')
             elif plot_func == 'plot_gas_number_density':
@@ -297,6 +295,55 @@ class DataProcesser:
         fns.sort()
         #print('fns=',fns)
         return fns
+
+    @staticmethod
+    def plot_multi_zones(zone_size = [np.array([0,1,0,1])], color = ['r'], zone_only=True):
+        """
+        This finction will plot the zones in the room.
+        zone_size: list with numpy list as elements, the size of the zone ex. [np.[xmin,xmax,ymin,ymax],...]
+        n_zone: int, the number of zones
+        color: list with string as elements, the color of the zone ex. ['r','b',...]
+        zone_only: bool, True to create a new figure, False to plot on the current figure.
+
+        more information about the zone_size:
+        1. If the zone is a rectangle, the zone_size should be a numpy array with 4 elements [xmin,xmax,ymin,ymax]
+        2. If the zone is a circle, the zone_size should be a numpy array with 3 elements [radius,center_position,angle_range]
+        """
+        # if we only want to plot the zones
+        if zone_only:
+            plt.figure()
+        # run the main loop for ploting zones
+        for n, zone in enumerate(zone_size):
+            if len(zone) == 4:  
+                x = [zone[0],zone[1],zone[1],zone[0]]
+                y = [zone[2],zone[2],zone[3],zone[3]]
+                plt.fill(x,y,color[n])
+            elif len(zone) == 3:
+                theta = np.linspace(zone[2][0], zone[2][1], 100)
+                x = zone[1][0] + zone[0] * np.cos(theta)
+                y = zone[1][1] + zone[0] * np.sin(theta)
+                plt.fill(x, y, color[n])
+            else:
+                print(f'{zone} is a invalid zone size. Please check your zone size.')
+                continue
+        # close the plot if we only want to plot the zones
+        if zone_only:
+            plt.show()
+        return
+
+    @staticmethod
+    def plot_points_on_zones(points, color='black'):
+        """
+        This function will plot the points on the zones.
+        points: list with numpy list as elements, the position of the points ex. [np.array([x,y]),...]
+        color: string, the color of the points
+        To use this function, you need to open a plt.figure() first. Since it won't create a new figure.
+        """
+        for x, y in points:
+            plt.scatter(x, y, color=color)
+        return
+
+        
 
 
 if __name__ == '__main__':

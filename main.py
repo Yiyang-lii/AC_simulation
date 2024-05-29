@@ -16,10 +16,10 @@ envir = Environment(room_size=[0,5000,0,5000],heat_zone_size=[2400,2500,0,2500])
 
 
 #set particles
-particles_number = 1000
-particles = Particles(particles_number)
-particles.set_particles(pos_type='uniform', vel_type='Boltzmann',\
-                        room_size=envir.room_size, T=310, particles_radius=1, molecular_weight=28.9)
+particles_number=1000
+particles=Particles(particles_number)
+particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=envir.room_size,T=310,particles_radius=1,molecular_weight=28.9)
+
    
 
 #set simulation
@@ -27,15 +27,17 @@ simulation = Simulators(particles, envir)
 
 
 #set time step and time intial and final
-dt = 0.1
+dt = 0.01
 t_init = 0
-tmax = 100
+tmax = 1
 
 
 #particles.vel[:, 0] *= 0.01
 #particles.vel[:, 1] *= 0.01 
+
 filepaths = 'data/N100000_t0_0.1_100_Collision_off_HeatZone_on'
 filename  = 'AC_simulation'
+
 
 #filepaths=f'data/N{particles_number}_t{t_init}_{dt}_{tmax}_Collision_off_HeatZone_[2400,2500,0,2500]/'
 #filename='AC_simulation'
@@ -54,7 +56,8 @@ for i in range(len(time_arr)):
         print("\r simulated time: {:.2f} out of {} , len(v) = {}".format(particles.step*particles.dt, tmax, len(particles.vel)) , end='')
         #count average temperature of the particles in each step
         particles.T=Particles.count_average_T(particles)
-        #save data in each step
+        #save data in each steps
+  
         DataProcesser.data_output(particles, filepaths, filename)
 #generate the velocity distribution plot of last step to check the velocity distribution
 DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)
@@ -74,6 +77,6 @@ fns=DataProcesser.load_files(filepaths,filename)
 #DataProcesser.plot_velocity_distribution(particles.T, particles.mass, particles.vel)  
 #output movie  
 #DataProcesser.output_movie(fns, resolution=200, sigma=10, filename="temperature.mp4", fps=10, plot_func="plot_gas_temperature") #plot temperature
-DataProcesser.output_movie(fns, resolution=200, sigma=5, filename="number_density.mp4", fps=10, plot_func="plot_gas_number_density") #plot number density
+DataProcesser.output_movie(fns, resolution=200, sigma=0, filename="number_density_test.mp4", fps=10, plot_func="plot_gas_number_density") #plot number density
 print('end_time=',datetime.datetime.today())
 print('time_cost=',datetime.datetime.today()-datetime.datetime.today())

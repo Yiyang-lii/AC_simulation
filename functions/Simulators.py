@@ -32,8 +32,10 @@ class Simulators:
             critical_distance = 2 * self.particles.particles_radius 
             self.particles.pos,self.particles.vel=Simulators.collision(self.particles.pos,self.particles.vel,self.particles.nparticles,critical_distance)
         self.next_step(dt)
+        self.particles.step = int(self.particles.step + 1)
+        self.particles.dt=dt
         
-        return self.particles.pos,self.particles.vel
+        return self.particles.pos,self.particles.vel,self.particles.step,self.particles.dt
            
  
     def next_step(self,dt:float):
@@ -46,7 +48,7 @@ class Simulators:
 
 
     @staticmethod
-    @nb.jit(nopython=True)
+    @nb.njit(parallel=True)
     def collision(pos, vel, nparticles, critical_distance: float):
         """
         This function will calculate the next step of the simulation with collision.

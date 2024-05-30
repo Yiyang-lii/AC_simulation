@@ -111,7 +111,7 @@ class Environment:
         down_wall = np.array([window[0], window[1], room[2], window[2]])
         return up_wall, down_wall
 
-    def boundary_bounce(self,particles, room_size = None, in_bound = True):
+    def boundary_bounce(self, particles, room_size=None, in_bound=True, heat=False):
         """
         This function will simulate how particles interact with the boundary(wall).
         particles: a Particles object
@@ -135,6 +135,7 @@ class Environment:
             mask2 = pos[:, 0] <= r_pos[1]
             mask3 = pos[:, 1] >= r_pos[2]
             mask4 = pos[:, 1] <= r_pos[3]
+        
         # check for negative x boundary
         pos[mask1, 0] = 2 * r_pos[0] - pos[mask1, 0]
         vel[mask1, 0] = -vel[mask1, 0]
@@ -149,7 +150,7 @@ class Environment:
         vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
 
-    def heat_hole_add_temperature(self, particles, T = 310):
+    def heat_hole_add_temperature(self, particles, T=310):
         """
         This function will simulate particles in and out the ac room. Need to be called before boundary_bounce.
         particles: a Particles object
@@ -182,7 +183,7 @@ class Environment:
         vel = particles.vel
         return Particles.rotate_particles(pos,vel,radius,source)
 
-    def ac_suck_and_blow(self, particles, T = 298):
+    def ac_suck_and_blow(self, particles, T=298):
         """
         This function will simulate the air conditioner sucking air and blowing air.
         particles: a Particles object

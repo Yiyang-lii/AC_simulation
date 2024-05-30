@@ -9,14 +9,22 @@ class Environment:
     """
     Class environment sets how the particles interact with the environment.
     """    
-    def __init__(self, room_size = [0,15,0,10], heat_zone_size = [10,15,0,10], open_window = 2):
+    def __init__(self, room_size=[0,15,0,10] ,heat_zone_size=[10,15,0,10], \
+                 heat_hole_width=3, heat_hole_buffer=0.05):
         """
         Define the properties of the environment.
         room_size: size of the room (only support rectangle room) [xmin,xmax,ymin,ymax]
-        heat_zone: size of the area that increase temperature of particles [xmin,xmax,ymin,ymax]
+        heat_zone_size: size of the heat zone [xmin,xmax,ymin,ymax]
+        heat_hole_width: width of the heat hole
+        heat_hole_buffer: buffer of the heat hole (n% of the heat hole width)
         """
         self.room_size     = np.array(room_size)
-        self.heat_zone     = np.array(heat_zone_size)        
+        # define the heat hole and heat zone
+        self.heat_zone     = np.array(heat_zone_size)
+        heat_hole_dot      = np.array([room_size[1], (room_size[2] + room_size[3])/2])
+        self.heat_hole     = np.array([heat_hole_dot[0] - heat_hole_width*heat_hole_buffer, heat_hole_dot[0],\
+                                      heat_hole_dot[1] - heat_hole_width/2, heat_hole_dot[1] + heat_hole_width/2])
+        # define ac:
         half_hole_length        = (room_size[3] - room_size[2])/4 * 0.5
         buff_length             = half_hole_length*0.1
         # define default ac suck hole
@@ -30,10 +38,10 @@ class Environment:
         self.ac_blow_hole_dot   = np.array([room_size[0], blow_hole_mid_dot])
         self.ac_blow_hole       = np.array([room_size[0], room_size[0] + buff_length,\
                                 blow_hole_mid_dot - half_hole_length, blow_hole_mid_dot + half_hole_length])
-        # define the range of the window
-        window_dot =(heat_zone_size[2] + heat_zone_size[3]) / 2
-        self.window = np.array([heat_zone_size[0],heat_zone_size[0],\
-                                window_dot - open_window/2, window_dot + open_window/2])
+        # # define the range of the window
+        # window_dot =(heat_zone_size[2] + heat_zone_size[3]) / 2
+        # self.window = np.array([heat_zone_size[0],heat_zone_size[0],\
+        #                         window_dot - open_window/2, window_dot + open_window/2])
 
     def set_room_size(self, room_size):
         """
@@ -87,6 +95,14 @@ class Environment:
         """
         self.heat_zone = np.array(heat_zone_size)
         return
+    
+    def set_heat_hole(self, heat_hole_size):
+        """
+        Can modify the size of the heat zone.
+        heat_hole_size: [xmin,xmax,ymin,ymax]
+        """
+        self.heat_hole = np.array(heat_hole_size)
+        return
 
     def wall_between_ac_room_and_heat_space(self):
         room = self.room_size
@@ -133,23 +149,26 @@ class Environment:
         vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
 
-    def heat_zone_add_temperature(self, particles, T = 310):
+    def heat_hole_add_temperature(self, particles, T = 310):
         """
-        This function will simulate the heat zone increasing the temperature of the particles.
+        This function will simulate particles in and out the ac room. Need to be called before boundary_bounce.
         particles: a Particles object
-        T: temperature of the heat zone
+        T: temperature of the outside of the ac room
         """
-        kB = const.Boltzmann
-        m  = particles.mass
-        pos = particles.pos
-        vel = particles.vel
+        kB       = const.Boltzmann
+        m        = particles.mass
+        pos      = particles.pos
+        vel      = particles.vel
+        vel_unit = vel / np.sqrt(vel[:,0]**2 + vel[:,1]**2).reshape(-1,1)
         # check which particles are in the heat zone
-        mask = self.is_the_particle_in_the_zone(pos, self.heat_zone)
-        factor = np.array([np.zeros(len(vel[mask]))])
-        for i in range(len(vel[mask])):
-            factor[0][i]=np.linalg.norm(vel[mask][i])/stats.maxwell.rvs(loc = 0, scale = np.sqrt(kB * T / m), size = 1)
-        vel[mask]=factor.T*vel[mask]
-        return vel
+        mask = self.is_the_particle_in_the_zone(pos, self.heat_hole)
+        # change the velocity of the particles in the heat hole.
+        heat_particle_number = len(pos[mask, 0])
+        v_hot      = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size=heat_particle_number)
+        vel[mask, 0] = v_hot * vel_unit[mask, 0]
+        vel[mask, 1] = v_hot * vel_unit[mask, 1]
+        return
+
 
     def ac_suck_behavior(self,particles):
         """

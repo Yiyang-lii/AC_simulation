@@ -9,18 +9,21 @@ import datetime
 import matplotlib.pyplot as plt
 start_time=datetime.datetime.today()
 print('start_time=',start_time)
-nthreads = 20
+nthreads = 1
 nb.set_num_threads(nthreads)
 #'''
 #set environment
-envir = Environment(room_size=[0,5000,0,5000],heat_zone_size=[2400,2500,0,2500])
-filepaths='data/test'
-filename='AC_simulation'
+envir = Environment(room_size=[0,5000,0,5000],heat_hole_width=1000,heat_hole_buffer=0.05)
+filepaths='data/suck_blow_heat_n10000_t0_100_0.1'
+filename='suck_blow_heat_n10000'
+'''
+#restart simulation
+#particles=DataProcesser.data_input(f'{filepaths}/{filename}_t00362.bin')   
+'''
 
-#particles=DataProcesser.data_input(f'{filepaths}/{filename}_t00164.bin')   
-
+#new simulation
 #set particles
-particles_number=1000
+particles_number=10000
 particles=Particles(particles_number)
 particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=envir.room_size,T=310,particles_radius=10,molecular_weight=28.9)
 
@@ -46,11 +49,10 @@ tmax = 10
 time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
 for i in range(len(time_arr)):
-    
-    particles.pos,particles.vel,particles.step,particles.dt=simulation.evolve(dt=dt, collision=True)
-    #print('particles.vel=',particles.vel)
-    particles.pos,particles.vel=envir.ac_suck_and_blow(particles,T=290)
-    #particles.vel=envir.heat_zone_add_temperature(particles,T=310)
+
+    particles.vel = envir.heat_hole_add_temperature(particles,T=310)
+    particles.pos,particles.vel,particles.step,particles.dt = simulation.evolve(dt=dt, collision=False)
+    particles.pos,particles.vel=envir.ac_suck_and_blow(particles,T=AC_temperature)
     particles.vel = envir.ac_suck_behavior(particles)
     if i % 1 == 0:  
         print("time: ", "{:.2f}".format(particles.step*particles.dt))

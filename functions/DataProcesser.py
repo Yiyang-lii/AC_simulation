@@ -16,7 +16,7 @@ class DataProcesser:
         pass
     
     @staticmethod
-    def plot_velocity_distribution(temperature:float, mass:float, vel:list):
+    def plot_velocity_distribution(temperature:float, mass:float, vel:list, save=False):
         """
         This function will plot the velocity distribution of the particles.
         Temperature: The temperature of the room.
@@ -30,7 +30,6 @@ class DataProcesser:
         speeds = np.linalg.norm(vel, axis=1) #calculate the magnitude of the speeds
 
         plt.hist(speeds, bins=50, alpha=0.6, color='g', density=True, label='Simulation') #plot the histogram of the data
-        print(speeds)
         #create the theoretical distribution
         speeds_range = np.linspace(0, np.max(speeds), 100) #create 100 points from 0 to max speed
         theory_distribution = stats.maxwell.pdf(speeds_range, scale=np.sqrt(const.k*temperature / mass)) #apply the maxwell distribution
@@ -40,6 +39,9 @@ class DataProcesser:
         plt.ylabel('Probability Density')
         plt.legend()
         plt.show()
+        if save:
+            plt.close()
+        return
 
     @staticmethod
     def plot_position_distribution(pos:list,room_size:list, Nsection=5):

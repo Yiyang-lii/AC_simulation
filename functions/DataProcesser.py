@@ -223,6 +223,7 @@ class DataProcesser:
             return FileNotFoundError(f'The file {path} does not exist. Please check your path.')
         with open( path, 'rb') as file:       
             return pickle.load(file)
+        
     def output_particles_movie(fns, roomsize, filename='movie.mp4', fps=30):
         plt.style.use('dark_background')
         fig, ax = plt.subplots()

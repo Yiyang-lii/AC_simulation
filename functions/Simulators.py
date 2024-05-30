@@ -48,7 +48,7 @@ class Simulators:
 
 
     @staticmethod
-    @nb.njit(parallel=True)
+    @nb.njit(parallel=True, fastmath=True)
     def collision(pos, vel, nparticles, critical_distance: float):
         """
         This function will calculate the next step of the simulation with collision.
@@ -59,18 +59,19 @@ class Simulators:
             for j in range(nparticles):
                 if i>j and i!=j:
                     dist = np.linalg.norm(pos[i] - pos[j])
+                    if  dist < 2 * critical_distance:
+                    # 刚体碰撞速度公式，考虑弹性碰撞以及相同质量做简化
+                        pos_i, vel_i = pos[i], vel[i]
+                        pos_j, vel_j = pos[j], vel[j]
+                        r_ij, v_ij = pos_i - pos_j, vel_i - vel_j
+                        r_dot_r = r_ij @ r_ij
+                        v_dot_r = v_ij @ r_ij
+                        Jn = -v_dot_r * r_ij / r_dot_r
+                        vel[i] += Jn
+                        vel[j] -= Jn
                 else:
                     continue
-                if  dist < 2 * critical_distance:
-                    # 刚体碰撞速度公式，考虑弹性碰撞以及相同质量做简化
-                    pos_i, vel_i = pos[i], vel[i]
-                    pos_j, vel_j = pos[j], vel[j]
-                    r_ij, v_ij = pos_i - pos_j, vel_i - vel_j
-                    r_dot_r = r_ij @ r_ij
-                    v_dot_r = v_ij @ r_ij
-                    Jn = -v_dot_r * r_ij / r_dot_r
-                    vel[i] += Jn
-                    vel[j] -= Jn
+
         return pos, vel
     
 if __name__ == "__main__":

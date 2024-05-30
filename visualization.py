@@ -9,11 +9,14 @@ import datetime
 import matplotlib.pyplot as plt
 start_time=datetime.datetime.today()
 print('start_time=',start_time)
+
 nthreads = 1
+
 nb.set_num_threads(nthreads)
 #'''
 #set environment
 envir = Environment(room_size=[0,5000,0,5000],heat_zone_size=[2400,2500,0,2500])
+
 filepaths='data/suck_blow_heat_n10000_t0_100_0.1'
 filename='suck_blow_heat_n10000'
 
@@ -29,9 +32,12 @@ DataProcesser.plot_velocity_distribution(particles.count_average_T(), particles.
 print('t01000_average temperature=',particles.count_average_T())
 
 
+
 #output movie  
 
+
 DataProcesser.output_movie(fns, resolution=200, sigma=10, filename="temperature.mp4", fps=10, plot_func="plot_gas_temperature") #plot temperature
+
 DataProcesser.output_particles_movie(fns, envir.room_size, filename=f'{filename}.mp4', fps=30) #plot particles
 #DataProcesser.output_movie(fns, resolution=200, sigma=0, filename="number_density_test.mp4", fps=10, plot_func="plot_gas_number_density") #plot number density
 end_time=datetime.datetime.today()

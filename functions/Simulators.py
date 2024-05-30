@@ -30,20 +30,22 @@ class Simulators:
         self.particles.pos, self.particles.vel = self.env.boundary_bounce(self.particles, room_size=self.env.room_size, in_bound=True)
         if collision:
             critical_distance = 2 * self.particles.particles_radius 
-            Simulators.collision(self.particles.pos,self.particles.vel,self.particles.nparticles,critical_distance)
-        # rotate the particles located near the suck zone
-        self.particles.vel = self.env.ac_suck_behavior(self.particles)
+            self.particles.pos,self.particles.vel=Simulators.collision(self.particles.pos,self.particles.vel,self.particles.nparticles,critical_distance)
         self.next_step(dt)
+        self.particles.step = int(self.particles.step + 1)
+        self.particles.dt=dt
+        
+        return self.particles.pos,self.particles.vel,self.particles.step,self.particles.dt
            
-
+ 
     def next_step(self,dt:float):
         """
         This function will calculate the next step of the simulation.
         """
-
-        
         # get the next position and velocity of the particles
         self.particles.pos += self.particles.vel * dt 
+
+
 
     @staticmethod
     @nb.njit(parallel=True)
@@ -57,6 +59,8 @@ class Simulators:
             for j in range(nparticles):
                 if i>j and i!=j:
                     dist = np.linalg.norm(pos[i] - pos[j])
+                else:
+                    continue
                 if  dist < 2 * critical_distance:
                     # 刚体碰撞速度公式，考虑弹性碰撞以及相同质量做简化
                     pos_i, vel_i = pos[i], vel[i]
@@ -67,12 +71,12 @@ class Simulators:
                     Jn = -v_dot_r * r_ij / r_dot_r
                     vel[i] += Jn
                     vel[j] -= Jn
+        return pos, vel
     
 if __name__ == "__main__":
     
     nthreads = 2
     nb.set_num_threads(nthreads)
-
     dt = 0.01
     t_init = 0
     tmax = 10

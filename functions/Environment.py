@@ -124,6 +124,7 @@ class Environment:
         vel = particles.vel
         if room_size is None:
             self.room_size = room_size
+
         r_pos = room_size
         # check if the particles is out of the boundary for in_bound senario
         if in_bound:

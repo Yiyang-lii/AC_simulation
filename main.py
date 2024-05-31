@@ -14,18 +14,23 @@ nthreads = 8
 nb.set_num_threads(nthreads)
 #'''
 #set environment
-envir = Environment(room_size=[0,5000,0,5000],heat_hole_width=5000,heat_hole_buffer=0.05)
-filename='suck_blow_1heat_n100000_dT20'
-filepaths=f'data/{filename}_t0_100_0p1'
+
+room_length = 5000
+envir = Environment(room_size=[0,room_length,0,room_length],heat_hole_width=room_length*0.6)
+filepaths='data/0.6heat_n100000_room5000_dT20_t_0_100_0p1'
+filename='0.6heat_n100000_room5000_dT20'
 
 
 
 #new simulation
 #set particles
 particles_number=100000
+AC_temperature = 290
+room_temperature = 310
+
 particles=Particles(particles_number)
-particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=envir.room_size,T=310,particles_radius=3,molecular_weight=28.9)
-AC_temperature=290
+particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=envir.room_size,T=room_temperature,particles_radius=3,molecular_weight=28.9)
+
 
 #set simulation
 simulation = Simulators(particles, envir)
@@ -48,9 +53,7 @@ tmax = 100
 time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
 for i in range(len(time_arr)):
-
-
-    particles.vel = envir.heat_hole_add_temperature(particles,T=310)
+    particles.vel = envir.heat_hole_add_temperature(particles,T=room_temperature, zone=False)
     particles.pos,particles.vel,particles.step,particles.dt = simulation.evolve(dt=dt, collision=False)
     particles.pos,particles.vel=envir.ac_suck_and_blow(particles,T=AC_temperature)
 

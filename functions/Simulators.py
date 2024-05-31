@@ -23,7 +23,8 @@ class Simulators:
 
         :param dt: float, the time step
         :param tmax: float, the total time to evolve
-        
+        :param collision: bool, whether the particles collide with each other
+        :param auto_heat: bool, whether the particles are heated by the environment
         """
         #TODO
         # check whether particles bounce on the wall

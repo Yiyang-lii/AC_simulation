@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import scipy.stats as stats
 import scipy.constants as const
-#from Particles import Particles
+# from Particles import Particles
 from functions.Particles import Particles 
 
 class Environment:
@@ -111,16 +111,18 @@ class Environment:
         down_wall = np.array([window[0], window[1], room[2], window[2]])
         return up_wall, down_wall
 
-    def boundary_bounce(self, particles, room_size=None, in_bound=True, heat=False):
+    def boundary_bounce(self, particles, room_size=[], in_bound=True):
         """
         This function will simulate how particles interact with the boundary(wall).
-        particles: a Particles object
-        room_size: size of the room [xmin,xmax,ymin,ymax] = self.room_size if not specified
-        in_bound: True if the particles is inside the boundary, False if the particles is outside the boundary
+
+        :param particles: functions.Particles.Particles, a Particles object
+        :param room_size: numpy.ndarray,size of the room [xmin,xmax,ymin,ymax] = self.room_size if not specified
+        :param in_bound: bool, True if the particles is inside the boundary, False if the particles is outside the boundary
+        :param heat: bool, True to turn on a heat hole on the wall.
         """
         pos = particles.pos
         vel = particles.vel
-        if room_size is not None:
+        if room_size == []:
             self.room_size = room_size
         r_pos = room_size
         # check if the particles is out of the boundary for in_bound senario
@@ -135,7 +137,7 @@ class Environment:
             mask2 = pos[:, 0] <= r_pos[1]
             mask3 = pos[:, 1] >= r_pos[2]
             mask4 = pos[:, 1] <= r_pos[3]
-        
+        # call heat_hole_add_temperature if heat is True
         # check for negative x boundary
         pos[mask1, 0] = 2 * r_pos[0] - pos[mask1, 0]
         vel[mask1, 0] = -vel[mask1, 0]
@@ -150,11 +152,13 @@ class Environment:
         vel[mask4, 1] = -vel[mask4, 1]
         return pos, vel
 
-    def heat_hole_add_temperature(self, particles, T=310):
+    def heat_hole_add_temperature(self, particles, T=310, zone=True):
         """
         This function will simulate particles in and out the ac room. Need to be called before boundary_bounce.
-        particles: a Particles object
-        T: temperature of the outside of the ac room
+        
+        :param particles: functions.Particles.Particles, a Particles object
+        :param T: float, temperature of the outside of the ac room
+        :param zone: numpy.ndarray, True then the hole is a zone, False then the hole is a line on the wall.
         """
         kB       = const.Boltzmann
         m        = particles.mass
@@ -162,13 +166,17 @@ class Environment:
         vel      = particles.vel
         vel_unit = vel / np.sqrt(vel[:,0]**2 + vel[:,1]**2).reshape(-1,1)
         # check which particles are in the heat zone
-        mask = self.is_the_particle_in_the_zone(pos, self.heat_hole)
+        if zone:
+            mask = self.is_the_particle_in_the_zone(pos, self.heat_hole)
+        else:
+            hole_edge = np.array([self.room_size[1],self.heat_hole[2], self.heat_hole[3]])
+            mask = ((pos[:,0] > hole_edge[1]) & (pos[:,1] > hole_edge[1]) & (pos[:,1] < hole_edge[2]))
         # change the velocity of the particles in the heat hole.
         heat_particle_number = len(pos[mask, 0])
         v_hot      = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size=heat_particle_number)
         vel[mask, 0] = v_hot * vel_unit[mask, 0]
         vel[mask, 1] = v_hot * vel_unit[mask, 1]
-        return vel
+        return vel 
 
 
     def ac_suck_behavior(self,particles):

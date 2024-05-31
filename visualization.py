@@ -29,7 +29,7 @@ for i in [1, 500 ,1000]:
     particles=DataProcesser.data_input(f'{filepaths}/{filename}_t{i}.bin')  
     DataProcesser.plot_velocity_distribution(temperature=particles.count_average_T(),mass=particles.mass,vel=particles.vel,save=True,filepath=filename,filename=f'velocity_distribution_{filename}_t{i}')
     DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=density_sigma,fig_save=True,filename=f'gas_number_density_{filename}_t{i}',filepath=filename)
-    DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=temperture_sigma,fig_save=True,filename=f'gas_temperature_{filename}_t{i}',filepath=filename)
+    DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=270,vmax=330,sigma=temperture_sigma,fig_save=True,filename=f'gas_temperature_{filename}_t{i}',filepath=filename)
     print(f't{i}_average temperature = {particles.count_average_T()}')
 
 DataProcesser.plot_temperature_versus_time(fns,save=True,filename=f'temperature_versus_time_{filename}_t{i}',filepath=filename)

@@ -10,16 +10,16 @@ import matplotlib.pyplot as plt
 start_time=datetime.datetime.today()
 print('start_time=',start_time)
 
-nthreads = 8
+nthreads = 20
 nb.set_num_threads(nthreads)
 
 #set environment
 
-room_length = 5000
+room_length = 2500
 particles_number=100000
 AC_temperature = 290
 room_temperature = 310
-heat_hole_width_scale = 0.6
+heat_hole_width_scale = 1
 dt = 0.1
 tmax = 100
 
@@ -28,7 +28,7 @@ dt_tag=str(dt).replace('.','p')
 print('heat_hole_width_scale_tag=',heat_hole_width_scale_tag)
 print('dt_tag=',dt_tag)
 filename=f'{heat_hole_width_scale_tag}heat_n{particles_number}_room{room_length}_dT{room_temperature-AC_temperature}'
-filepaths=f'data/{filename}_t_0_{tmax}_dt_tag'
+filepaths=f'data/{filename}_t_0_{tmax}_{dt_tag}'
 
 #set environment
 envir = Environment(room_size=[0,room_length,0,room_length],heat_hole_width=room_length*heat_hole_width_scale)

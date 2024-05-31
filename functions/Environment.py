@@ -111,7 +111,7 @@ class Environment:
         down_wall = np.array([window[0], window[1], room[2], window[2]])
         return up_wall, down_wall
 
-    def boundary_bounce(self, particles, room_size=[], in_bound=True):
+    def boundary_bounce(self, particles, room_size=None, in_bound=True):
         """
         This function will simulate how particles interact with the boundary(wall).
 
@@ -122,7 +122,7 @@ class Environment:
         """
         pos = particles.pos
         vel = particles.vel
-        if room_size == []:
+        if room_size is None:
             self.room_size = room_size
         r_pos = room_size
         # check if the particles is out of the boundary for in_bound senario

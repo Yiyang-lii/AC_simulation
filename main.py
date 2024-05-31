@@ -47,7 +47,6 @@ print('t_init=',t_init)
 #particles.vel[:, 0] *= 0.01
 #particles.vel[:, 1] *= 0.01 
 
-
 time_arr = np.linspace(t_init, tmax, int((tmax - t_init) / dt) + 1)
 
 for i in range(len(time_arr)):

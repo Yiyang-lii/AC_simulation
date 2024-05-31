@@ -16,7 +16,7 @@ class DataProcesser:
         pass
     
     @staticmethod
-    def plot_velocity_distribution(temperature:float, mass:float, vel:list, save=False):
+    def plot_velocity_distribution(temperature:float, mass:float, vel:list, save=False,filepath='velocity_distribution',filename='velocity_distribution'):
         """
         This function will plot the velocity distribution of the particles.
         Temperature: The temperature of the room.
@@ -38,9 +38,12 @@ class DataProcesser:
         plt.xlabel('Speed (m/s)')
         plt.ylabel('Probability Density')
         plt.legend()
-        plt.show()
-        if save:
-            plt.close()
+        if save==True:
+            if not os.path.exists(filepath):
+                os.mkdir(filepath)
+            plt.savefig(f'{filepath}/{filename}.png')
+            print('save') 
+        plt.close()
         return
 
     @staticmethod
@@ -81,9 +84,9 @@ class DataProcesser:
         ax2.legend()
 
         plt.show()
-    
+        plt.close()
     @staticmethod
-    def plot_gas_number_density(particles, resolution=100,sigma=5,fig_save=False):
+    def plot_gas_number_density(particles, resolution=100,sigma=5,fig_save=False,filepath='Number_Density_Distribution',filename='Number_Density_Distribution'):
         """
         This function will plot the gas density of the particles. It will return the image object of the plot.
         particles: The particles object.
@@ -108,16 +111,16 @@ class DataProcesser:
         if fig_save=='video':
             return 
         elif fig_save==True:
-            if not os.path.exists('Gas_number_density_Distribution'):
-                os.mkdir('Gas_number_density_Distribution')
-            plt.savefig(f'Gas_number_density_Distribution/gas_number_density_resolution{resolution}_t{"{:.2f}".format(particles.step*particles.dt)}.png')
-            plt.close()
+            if not os.path.exists(filepath):
+                os.mkdir(filepath)
+            plt.savefig(f'{filepath}/{filename}.png')
         elif fig_save==False:
             plt.show()
+        plt.close()
         return im
 
     @staticmethod
-    def plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=1,fig_save=False):
+    def plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=1,fig_save=False,filepath='Temperature_Distribution',filename='Temperature_Distribution'):
         """
         This function will plot the gas temperature of the particles distribution in the room. It will return the image object of the plot.
         particles: The particles object.
@@ -155,12 +158,12 @@ class DataProcesser:
         if fig_save=='video':
             return 
         elif fig_save==True:
-            if not os.path.exists('Tempturature_Distribution'):
-                os.mkdir('Tempturature_distribution')
-            plt.savefig(f'Tempturature_distribution/temperature_Distribution_resolution{resolution}_t{"{:.2f}".format(particles.step*particles.dt)}.png')
-            plt.close()
+            if not os.path.exists(filepath):
+                os.mkdir(filepath)
+            plt.savefig(f'{filepath}/{filename}.png')
         elif fig_save==False:
             plt.show()
+        plt.close()
         return im
 
     @staticmethod
@@ -175,6 +178,7 @@ class DataProcesser:
         plt.ylabel('Y (m)')
         plt.title('Particles Distribution')
         plt.show()
+        plt.close()
         pass
   
     @staticmethod
@@ -226,7 +230,7 @@ class DataProcesser:
         with open( path, 'rb') as file:       
             return pickle.load(file)
         
-    def output_particles_movie(fns, roomsize, filename='movie.mp4', fps=30):
+    def output_particles_movie(fns, filename='movie.mp4', fps=30,filepath='video'):
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
         fig.set_linewidth(5)
@@ -237,8 +241,9 @@ class DataProcesser:
         def init():
             plt.xticks(fontsize=14)
             plt.yticks(fontsize=14)
-            ax.set_xlim(roomsize[0],roomsize[1])
-            ax.set_ylim(roomsize[2],roomsize[3])
+            Particles=DataProcesser.data_input(fns[0])
+            ax.set_xlim(Particles.room_size[0],Particles.room_size[1])
+            ax.set_ylim(Particles.room_size[2],Particles.room_size[3])
             ax.set_aspect('equal')
             ax.set_xlabel('X [code unit]', fontsize=18)
             ax.set_ylabel('Y [code unit]', fontsize=18)
@@ -252,10 +257,11 @@ class DataProcesser:
             print('frame=',frame)
             return line,
         ani = animation.FuncAnimation(fig, update, frames=len(fns), init_func=init, blit=True)
-        ani.save(filename, writer='ffmpeg', fps=fps)
+        filepath=f'{filepath}/{filename}'
+        ani.save(filepath, writer='ffmpeg', fps=fps)
         return
     @staticmethod
-    def output_movie(fns, resolution=100, sigma=5, filename='movie.mp4', fps=30, plot_func='plot_gas_temperature'):
+    def output_movie(fns, resolution=100, sigma=5, filename='movie.mp4', fps=30, plot_func='plot_gas_temperature',filepath='video'):
         """
         This function will create a movie of the data.
         fns: list, the list of output files
@@ -280,7 +286,8 @@ class DataProcesser:
             return
 
         ani = animation.FuncAnimation(fig, update, frames=len(fns), init_func=init)
-        ani.save(filename, writer='ffmpeg', fps=fps)
+        filepath=f'{filepath}/{filename}'
+        ani.save(filepath, writer='ffmpeg', fps=fps)
         return
 
     
@@ -344,6 +351,32 @@ class DataProcesser:
         """
         for x, y in points:
             plt.scatter(x, y, color=color)
+        return
+    def plot_temperature_versus_time(fns,filepath, filename, save=True):
+        """
+        This function will plot the temperature versus time.
+        particles: The particles object.
+        filepath: The path of the file. ex. 'data'
+        filename: The name of the file. ex. 'particles' 
+        """
+        temperature = []
+        t=[]
+        for fn in fns:
+            particles = DataProcesser.data_input(fn)
+            T=particles.count_average_T()
+            if np.isnan(T):
+                continue
+            else:
+                temperature.append(T)
+                t.append(particles.step*particles.dt)
+        plt.plot(t,temperature)
+        plt.xlabel('Time(s)')
+        plt.ylabel('Temperature(K)')
+        plt.title('Temperature versus Time')
+        if save:
+            if not os.path.exists(filepath):
+                os.mkdir(filepath)
+            plt.savefig(f'{filepath}/{filename}.png')
         return
 
         

@@ -119,7 +119,7 @@ class Particles:
             if distance>zone_radius:
                 continue   
             else:
-                theta=np.arccos(vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance**0.5
+                theta=np.arccos(np.clip((vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance**0.5,-1,1))
                 c, s = np.cos(theta), np.sin(theta)
                 R = np.array([[c, -s], [s, c]])
                 vel[i]=vel[i]@R

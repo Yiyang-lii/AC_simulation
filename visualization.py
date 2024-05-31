@@ -10,36 +10,41 @@ import matplotlib.pyplot as plt
 start_time=datetime.datetime.today()
 print('start_time=',start_time)
 
-nthreads = 1
-
+nthreads = 20
 nb.set_num_threads(nthreads)
+
+temperture_sigma=10
+density_sigma=5
 #'''
 #set environment
-envir = Environment(room_size=[0,5000,0,5000],heat_zone_size=[2400,2500,0,2500])
+filename='suck_blow_1heat_n100000_dT20'
+filepaths=f'data/{filename}_t0_100_0p1'
 
-filepaths='data/suck_blow_heat_n10000_t0_100_0.1'
-filename='suck_blow_heat_n10000'
 
 fns=DataProcesser.load_files(filepaths,filename) 
-particles=DataProcesser.data_input(f'{filepaths}/{filename}_t00001.bin')   
-DataProcesser.plot_velocity_distribution(particles.count_average_T(), particles.mass, particles.vel, save=True) 
-print('t00001_average temperature=',particles.count_average_T())
-particles=DataProcesser.data_input(f'{filepaths}/{filename}_t00500.bin')   
-DataProcesser.plot_velocity_distribution(particles.count_average_T(), particles.mass, particles.vel, save=True)  
-print('t00500_average temperature=',particles.count_average_T())
-particles=DataProcesser.data_input(f'{filepaths}/{filename}_t01000.bin')   
-DataProcesser.plot_velocity_distribution(particles.count_average_T(), particles.mass, particles.vel, save=True)  
-print('t01000_average temperature=',particles.count_average_T())
 
+for i in [1, 500 ,1000]:
+    i="{:05}".format(i)
+    print(f't{i}')
+    particles=DataProcesser.data_input(f'{filepaths}/{filename}_t{i}.bin')  
+    DataProcesser.plot_velocity_distribution(temperature=particles.count_average_T(),mass=particles.mass,vel=particles.vel,save=True,filepath=filename,filename=f'velocity_distribution_{filename}_t{i}')
+    DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=density_sigma,fig_save=True,filename=f'gas_number_density_{filename}_t{i}',filepath=filename)
+    DataProcesser.plot_gas_temperature(particles, resolution=100,vmin=280,vmax=320,sigma=temperture_sigma,fig_save=True,filename=f'gas_temperature_{filename}_t{i}',filepath=filename)
+    print(f't{i}_average temperature = {particles.count_average_T()}')
 
+DataProcesser.plot_temperature_versus_time(fns,save=True,filename=f'temperature_versus_time_{filename}_t{i}',filepath=filename)
 
 #output movie  
 
+#WARNING:output_particles_movie can almost see nothing when particles_number is more than 100000
+#DataProcesser.output_particles_movie(fns, filename=f'{filename}.mp4', fps=30) #plot particles
 
-DataProcesser.output_movie(fns, resolution=200, sigma=10, filename="temperature.mp4", fps=10, plot_func="plot_gas_temperature") #plot temperature
+#WARNING: The upper and lower bounds of the colorbar need to adjust manually in DataProcesser.py!!!
+DataProcesser.output_movie(fns, resolution=100, sigma=temperture_sigma, filename=f"temperature_{filename}_sigma{temperture_sigma}.mp4", fps=10, plot_func="plot_gas_temperature",filepath=filename) #plot temperature
+DataProcesser.output_movie(fns, resolution=100, sigma=density_sigma, filename=f"number_density_{filename}_sigma{density_sigma}.mp4", fps=10, plot_func="plot_gas_number_density",filepath=filename) #plot number density
 
-DataProcesser.output_particles_movie(fns, envir.room_size, filename=f'{filename}.mp4', fps=30) #plot particles
-#DataProcesser.output_movie(fns, resolution=200, sigma=0, filename="number_density_test.mp4", fps=10, plot_func="plot_gas_number_density") #plot number density
+
+
 end_time=datetime.datetime.today()
 print('end_time=',datetime.datetime.today())
 print('time_cost=',end_time-start_time)

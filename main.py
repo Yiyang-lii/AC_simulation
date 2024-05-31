@@ -10,25 +10,24 @@ import matplotlib.pyplot as plt
 start_time=datetime.datetime.today()
 print('start_time=',start_time)
 
-nthreads = 1
+nthreads = 8
 nb.set_num_threads(nthreads)
 #'''
 #set environment
+
 room_length = 5000
 envir = Environment(room_size=[0,room_length,0,room_length],heat_hole_width=room_length*0.6)
 filepaths='data/0.6heat_n100000_room5000_dT20_t_0_100_0p1'
 filename='0.6heat_n100000_room5000_dT20'
 
-'''
-#restart simulation
-#particles=DataProcesser.data_input(f'{filepaths}/{filename}_t00362.bin')   
-'''
+
 
 #new simulation
 #set particles
 particles_number=100000
 AC_temperature = 290
 room_temperature = 310
+
 particles=Particles(particles_number)
 particles.set_particles(pos_type='uniform',vel_type='Boltzmann',room_size=envir.room_size,T=room_temperature,particles_radius=3,molecular_weight=28.9)
 

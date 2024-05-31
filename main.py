@@ -33,7 +33,6 @@ AC_temperature=290
 #set simulation
 simulation = Simulators(particles, envir)
 
-
 #set time step and time intial and final
 dt = 0.1
 t_init = round(particles.step*particles.dt,2)
@@ -67,6 +66,7 @@ for i in range(len(time_arr)):
         DataProcesser.data_output(particles, filepaths, filename)
         time=datetime.datetime.today()-start_time
         time=time/(i+1)*(len(time_arr)-(i+1))
+        print(f'\rtime: {"{:.2f}".format(particles.step*particles.dt)},  {round(i/len(time_arr)*100,2)}% is done,  estimated remaining time = {time}',end='')
         print(f'\rtime: {"{:.2f}".format(particles.step*particles.dt)},  {round(i/len(time_arr)*100,2)}% is done,  estimated remaining time = {time}',end='')
 #==========================Save movie=================================  
 #generate the velocity distribution plot of last step to check the velocity distribution

@@ -168,7 +168,7 @@ class Environment:
         v_hot      = stats.maxwell.rvs(scale = np.sqrt(kB * T / m), size=heat_particle_number)
         vel[mask, 0] = v_hot * vel_unit[mask, 0]
         vel[mask, 1] = v_hot * vel_unit[mask, 1]
-        return
+        return vel
 
 
     def ac_suck_behavior(self,particles):

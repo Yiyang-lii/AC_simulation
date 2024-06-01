@@ -33,16 +33,16 @@ class DataProcesser:
         #create the theoretical distribution
         speeds_range = np.linspace(0, np.max(speeds), 100) #create 100 points from 0 to max speed
         theory_distribution = stats.maxwell.pdf(speeds_range, scale=np.sqrt(const.k*temperature / mass)) #apply the maxwell distribution
-        plt.plot(speeds_range, theory_distribution, 'r--', label='Theory')
-        plt.title('Speed Distribution')
+        plt.plot(speeds_range, theory_distribution, 'r--', label='Theory') 
+        plt.tight_layout
+        plt.title(f'Speed Distribution with average temperature={temperature}K')
         plt.xlabel('Speed (m/s)')
         plt.ylabel('Probability Density')
         plt.legend()
         if save==True:
             if not os.path.exists(filepath):
                 os.mkdir(filepath)
-            plt.savefig(f'{filepath}/{filename}.png')
-            print('save') 
+            plt.savefig(f'{filepath}/{filename}.png') 
         plt.close()
         return
 
@@ -148,7 +148,7 @@ class DataProcesser:
         #ckeck the mean value of the temperature
         temp=np.mean(tempturature)
         particles.temperature_average=round(temp,2)
-        print('T_average=',particles.temperature_average,'K')
+        #print('T_average=',particles.temperature_average,'K')
         # Plot the 2D histogram with mean values
         im=plt.imshow(smoothed_mean_values.T, extent=(xmin, xmax, ymin, ymax), cmap='coolwarm',vmin=vmin,vmax=vmax, origin='lower')
         plt.colorbar(label='Temperature (K)')
@@ -278,7 +278,7 @@ class DataProcesser:
             plt.clf()
             fn = fns[frame]
             particles = DataProcesser.data_input(fn)  
-            print(f'\r frame = {frame}, step={particles.step}, filepath = {fn}   ', end='')
+            print(f'\r frame = {frame}, step={particles.step}, filepath = {fn}', end='')
             if plot_func == 'plot_gas_temperature':
                 DataProcesser.plot_gas_temperature(particles, resolution=resolution,sigma=sigma,vmin=270,vmax=330,fig_save='video')
             elif plot_func == 'plot_gas_number_density':

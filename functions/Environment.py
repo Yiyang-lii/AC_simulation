@@ -10,7 +10,7 @@ class Environment:
     Class environment sets how the particles interact with the environment.
     """    
     def __init__(self, room_size=[0,15,0,10] ,heat_zone_size=[10,15,0,10], \
-                 heat_hole_width=3, heat_hole_buffer=0.05):
+                 heat_hole_width=3, heat_hole_buffer=0.05,AC_power_scale=0.5):
         """
         Define the properties of the environment.
         room_size: size of the room (only support rectangle room) [xmin,xmax,ymin,ymax]
@@ -28,6 +28,7 @@ class Environment:
         half_hole_length        = (room_size[3] - room_size[2])/4 * 0.5
         buff_length             = half_hole_length*0.1
         # define default ac suck hole
+        self.power_scale        = AC_power_scale
         suck_hole_mid_dot       = (3*room_size[2] + room_size[3])/4
         self.suck_zone_radius   = (room_size[3] - room_size[2])/4
         self.ac_suck_hole_dot   = np.array([room_size[0], suck_hole_mid_dot])
@@ -187,9 +188,11 @@ class Environment:
         """
         source = self.ac_suck_hole_dot
         radius = self.suck_zone_radius
+        power_scale=self.power_scale
         pos = particles.pos
         vel = particles.vel
-        return Particles.rotate_particles(pos,vel,radius,source)
+        particles.vel= Particles.rotate_particles(pos,vel,radius,source,power_scale)
+        return particles.vel
 
     def ac_suck_and_blow(self, particles, T=298):
         """

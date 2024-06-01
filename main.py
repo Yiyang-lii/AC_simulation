@@ -18,7 +18,7 @@ nb.set_num_threads(nthreads)
 room_length = 5000
 particles_number=2000
 AC_temperature = 270
-AC_power_scale = 0.2
+AC_power_scale = 0
 room_temperature = 330
 heat_hole_width_scale = 0.2
 dt = 0.1
@@ -28,7 +28,7 @@ heat_hole_width_scale_tag=str(heat_hole_width_scale).replace('.','p')
 dt_tag=str(dt).replace('.','p')
 print('heat_hole_width_scale_tag=',heat_hole_width_scale_tag)
 print('dt_tag=',dt_tag)
-filename=f'{heat_hole_width_scale_tag}heat_n{particles_number}_room{room_length}_dT{room_temperature-AC_temperature}'
+filename=f'{heat_hole_width_scale_tag}heat_n{particles_number}_room{room_length}_dT{room_temperature-AC_temperature}_AC{AC_power_scale}'
 filepaths=f'data/{filename}_t_0_{tmax}_{dt_tag}'
 
 #set environment

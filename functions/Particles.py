@@ -105,7 +105,7 @@ class Particles:
     
     @staticmethod
     #@nb.njit(parallel=True)
-    def rotate_particles(pos:list,vel:list,zone_radius,source_point):
+    def rotate_particles(pos:list,vel:list,zone_radius,source_point,power_scale=0.5):
         """
         This function will rotate the particles by an angle theta.
         pos: position of the particles
@@ -118,11 +118,12 @@ class Particles:
             distance=np.linalg.norm(point_vector)
             if distance>zone_radius:
                 continue   
-            else:
-                theta=np.arccos(np.clip((vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance**0.5,-1,1))
-                c, s = np.cos(theta), np.sin(theta)
-                R = np.array([[c, -s], [s, c]])
-                vel[i]=vel[i]@R
+            cos=np.clip((vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i]))),-1,1)
+            theta=np.arccos(cos)/distance**power_scale
+            #theta=np.arccos((vel[i]@point_vector/(np.linalg.norm(point_vector)*np.linalg.norm(vel[i])))/distance**0.5)
+            c, s = np.cos(theta), np.sin(theta)
+            R = np.array([[c, -s], [s, c]])
+            vel[i]=R@vel[i]
         return vel
 
 if __name__ == "__main__":

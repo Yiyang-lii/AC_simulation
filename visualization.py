@@ -13,12 +13,12 @@ print('start_time=',start_time)
 nthreads = 20
 nb.set_num_threads(nthreads)
 
-temperture_sigma=10
+temperture_sigma=5
 density_sigma=5
 #'''
 #set environment
-filename='suck_blow_1heat_n100000_dT20'
-filepaths=f'data/{filename}_t0_100_0p1'
+filename='0p2heat_n2000_room5000_dT60'
+filepaths=f'data/{filename}_t_0_100_0p1'
 
 
 fns=DataProcesser.load_files(filepaths,filename) 
@@ -26,6 +26,7 @@ fns=DataProcesser.load_files(filepaths,filename)
 for i in [1, 500 ,1000]:
     i="{:05}".format(i)
     print(f't{i}')
+    print(f'{filepaths}/{filename}_t{i}.bin')
     particles=DataProcesser.data_input(f'{filepaths}/{filename}_t{i}.bin')  
     DataProcesser.plot_velocity_distribution(temperature=particles.count_average_T(),mass=particles.mass,vel=particles.vel,save=True,filepath=filename,filename=f'velocity_distribution_{filename}_t{i}')
     DataProcesser.plot_gas_number_density(particles, resolution=100,sigma=density_sigma,fig_save=True,filename=f'gas_number_density_{filename}_t{i}',filepath=filename)
@@ -37,7 +38,7 @@ DataProcesser.plot_temperature_versus_time(fns,save=True,filename=f'temperature_
 #output movie  
 
 #WARNING:output_particles_movie can almost see nothing when particles_number is more than 100000
-#DataProcesser.output_particles_movie(fns, filename=f'{filename}.mp4', fps=30) #plot particles
+DataProcesser.output_particles_movie(fns, filename=f'{filename}.mp4', fps=30,filepath=filename) #plot particles
 
 #WARNING: The upper and lower bounds of the colorbar need to adjust manually in DataProcesser.py!!!
 DataProcesser.output_movie(fns, resolution=100, sigma=temperture_sigma, filename=f"temperature_{filename}_sigma{temperture_sigma}.mp4", fps=10, plot_func="plot_gas_temperature",filepath=filename) #plot temperature
